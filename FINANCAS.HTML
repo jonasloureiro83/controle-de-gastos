@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Gastos</title>
+    <!-- Inclui o Tailwind CSS para um estilo moderno e responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Variáveis CSS para o tema claro */
+        :root {
+            --bg-color: #f3f4f6;
+            --text-color: #1f2937;
+            --card-bg: #ffffff;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --input-border-color: #d1d5db;
+            --input-focus-color: #4f46e5;
+            --primary-button-bg: #4f46e5;
+            --primary-button-hover-bg: #4338ca;
+            --secondary-button-bg: #e5e7eb;
+            --secondary-button-hover-bg: #d1d5db;
+            --text-gray-800: #1f2937;
+            --text-gray-700: #374151;
+            --text-gray-500: #6b7280;
+            --indigo-bg-100: #c7d2fe;
+            --indigo-text-900: #312e81;
+            --indigo-text-800: #3730a3;
+            --indigo-text-700: #4338ca;
+            --chart-bg: #ffffff;
+            --chart-grid-color: #e5e7eb;
+            --chart-text-color: #1f2937;
+        }
+        /* Variáveis CSS para o tema escuro */
+        .dark {
+            --bg-color: #111827;
+            --text-color: #f3f4f6;
+            --card-bg: #1f2937;
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+            --input-border-color: #4b5563;
+            --input-focus-color: #818cf8;
+            --primary-button-bg: #4338ca;
+            --primary-button-hover-bg: #3730a3;
+            --secondary-button-bg: #4b5563;
+            --secondary-button-hover-bg: #6b7280;
+            --text-gray-800: #d1d5db;
+            --text-gray-700: #9ca3af;
+            --text-gray-500: #9ca3af;
+            --indigo-bg-100: #312e81;
+            --indigo-text-900: #c7d2fe;
+            --indigo-text-800: #eef2ff;
+            --indigo-text-700: #a5b4fc;
+            --chart-bg: #1f2937;
+            --chart-grid-color: #4b5563;
+            --chart-text-color: #d1d5db;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .bg-white { background-color: var(--card-bg); }
+        .shadow-2xl { box-shadow: var(--card-shadow); }
+        .bg-gray-100 { background-color: var(--secondary-button-bg); }
+        .bg-gray-50 { background-color: var(--secondary-button-bg); }
+        .text-gray-800 { color: var(--text-gray-800); }
+        .text-gray-700 { color: var(--text-gray-700); }
+        .text-gray-500 { color: var(--text-gray-500); }
+        .text-red-500 { color: #ef4444; }
+        .text-green-600 { color: #16a34a; }
+        .bg-indigo-600 { background-color: var(--primary-button-bg); }
+        .hover\:bg-indigo-700:hover { background-color: var(--primary-button-hover-bg); }
+        .bg-indigo-50 { background-color: var(--secondary-button-bg); }
+        .text-indigo-700 { color: var(--indigo-text-700); }
+        .bg-indigo-100 { background-color: var(--indigo-bg-100); }
+        .text-indigo-900 { color: var(--indigo-text-900); }
+        .text-indigo-800 { color: var(--indigo-text-800); }
+        
+        .budget-progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            background-color: var(--chart-bg);
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .loading-spinner {
+            border: 4px solid var(--text-gray-800);
+            border-top: 4px solid var(--input-focus-color);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Estilos para inputs e selects para tema escuro */
+        .p-3.border.border-gray-300,
+        .p-2.border.border-gray-300 {
+            background-color: var(--card-bg);
+            border-color: var(--input-border-color);
+            color: var(--text-color);
+        }
+        .p-3.border.border-gray-300:focus,
+        .p-2.border.border-gray-300:focus {
+            border-color: var(--input-focus-color);
+        }
+        .text-gray-400 { color: #9ca3af; }
+        .dark .text-gray-400 { color: #6b7280; }
+    </style>
+    <!-- Bibliotecas de terceiros para gráficos e exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-4xl">
+        <h1 class="text-3xl font-extrabold text-center mb-6 text-gray-800">Controle de Gastos</h1>
+        
+        <!-- Botões de navegação entre as telas -->
+        <div class="flex justify-center space-x-4 mb-6">
+            <button id="show-main-button" class="px-6 py-2 rounded-full text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
+                Tela Principal
+            </button>
+            <button id="show-dashboard-button" class="px-6 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">
+                Dashboard
+            </button>
+            <button id="show-settings-button" class="px-6 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">
+                Configuração
+            </button>
+            <!-- Botão para alternar tema -->
+            <button id="theme-toggle-button" class="px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+
+        <!-- Conteúdo da tela principal (visível por padrão) -->
+        <div id="main-view">
+            <!-- Formulário para adicionar/editar nova transação -->
+            <form id="transaction-form" class="space-y-4 mb-6">
+                <!-- Campo oculto para armazenar o ID da transação em edição -->
+                <input type="hidden" id="transaction-id-to-edit" value="">
+                
+                <div class="flex flex-col relative">
+                    <label for="description" class="text-sm font-medium mb-1 text-gray-700">Descrição da Compra</label>
+                    <input type="text" id="description" placeholder="Ex: Mercado, Combustível, Jantar" required
+                            class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                </div>
+                <!-- Novo campo de detalhes -->
+                <div class="flex flex-col relative">
+                    <label for="detail" class="text-sm font-medium mb-1 text-gray-700">Detalhe (opcional)</label>
+                    <input type="text" id="detail" placeholder="Ex: Ração de cachorro, jantar com amigos"
+                            class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                    <!-- Campo de data e hora atualizado -->
+                    <div class="flex flex-col">
+                        <label for="transaction-datetime" class="text-sm font-medium mb-1 text-gray-700">Data e Hora da Compra</label>
+                        <input type="datetime-local" id="transaction-datetime" required
+                                class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="amount" class="text-sm font-medium mb-1 text-gray-700">Valor (R$)</label>
+                        <input type="number" id="amount" placeholder="Ex: 50.00" required step="0.01"
+                                class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="payment-method" class="text-sm font-medium mb-1 text-gray-700">Forma de Pagamento</label>
+                        <select id="payment-method" required
+                                class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                            <option value="">Selecione a forma de pagamento</option>
+                            <!-- Opções serão preenchidas dinamicamente pelo JavaScript -->
+                        </select>
+                    </div>
+                    <div class="flex flex-col">
+                        <label for="category" class="text-sm font-medium mb-1 text-gray-700">Categoria</label>
+                        <select id="category" required
+                                class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                            <option value="">Selecione a categoria</option>
+                            <!-- Opções serão preenchidas dinamicamente pelo JavaScript -->
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" id="submit-button"
+                        class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105">
+                    Adicionar Gasto
+                </button>
+            </form>
+            
+            <!-- Seção de filtros de relatório -->
+            <div class="mt-6 mb-4 flex justify-center space-x-2 flex-wrap">
+                <button id="filter-day" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
+                    Diário
+                </button>
+                <button id="filter-yesterday" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
+                    Ontem
+                </button>
+                <button id="filter-week" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
+                    Semanal
+                </button>
+                <button id="filter-month" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
+                    Mensal
+                </button>
+                <button id="filter-all" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors active">
+                    Todos
+                </button>
+            </div>
+            
+            <!-- Filtro por período de datas -->
+            <div class="mt-6 p-4 bg-white rounded-xl shadow-inner">
+                <h3 class="text-lg font-semibold text-gray-700 mb-2">Filtrar por Período</h3>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
+                    <input type="date" id="start-date-input" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                    <span class="text-gray-500">até</span>
+                    <input type="date" id="end-date-input" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                    <button id="filter-by-date-button" class="filter-button w-full sm:w-auto bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-indigo-600 transition-colors">
+                        Aplicar Filtro
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <!-- Seção para exibir a lista de transações -->
+                <div class="bg-gray-50 p-4 rounded-xl shadow-inner col-span-1">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Histórico de Transações</h2>
+                    <p id="loading-message" class="text-center text-gray-500">Nenhum gasto encontrado.</p>
+                    <ul id="transaction-list" class="space-y-2">
+                        <!-- As transações serão adicionadas aqui pelo JavaScript -->
+                    </ul>
+                </div>
+                
+                <!-- Seção para exibir o gráfico na tela principal -->
+                <div class="bg-gray-50 p-4 rounded-xl shadow-inner flex flex-col justify-between col-span-1 space-y-6">
+                    <div>
+                        <h2 class="text-xl font-bold mb-4 text-gray-800">Distribuição de Gastos por Categoria</h2>
+                        <canvas id="spending-pie-chart-main"></canvas>
+                    </div>
+                    <div class="mt-4">
+                        <button id="export-button"
+                            class="w-full bg-green-600 text-white font-semibold py-3 rounded-xl hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105">
+                            Exportar para XLSX
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção para exibir o total dos gastos -->
+            <div class="mt-6 p-4 bg-indigo-100 rounded-xl text-center shadow-lg">
+                <h2 class="text-xl font-bold text-indigo-800">Total de Gastos</h2 >
+                <p id="total-amount" class="text-4xl font-extrabold mt-2 text-indigo-900">R$ 0,00</p>
+                <!-- Novo indicador de variação de gastos -->
+                <div id="spending-variation" class="mt-2 text-sm font-semibold flex items-center justify-center space-x-2">
+                    <!-- O conteúdo será adicionado via JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo do Dashboard (escondido por padrão) -->
+        <div id="dashboard-view" class="hidden">
+            <div class="space-y-6">
+                <!-- Filtros para o Dashboard -->
+                <div class="mt-6 mb-4 p-4 bg-white rounded-xl shadow-inner flex flex-wrap justify-center space-x-2">
+                    <button id="dashboard-filter-month" class="dashboard-filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors active">
+                        Mensal
+                    </button>
+                    <button id="dashboard-filter-week" class="dashboard-filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
+                        Semanal
+                    </button>
+                    <input type="date" id="dashboard-start-date-input" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow sm:flex-grow-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                    <span class="text-gray-500">até</span>
+                    <input type="date" id="dashboard-end-date-input" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow sm:flex-grow-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                    <button id="dashboard-filter-by-date-button" class="dashboard-filter-button w-full sm:w-auto bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-indigo-600 transition-colors">
+                        Aplicar Filtro
+                    </button>
+                </div>
+                
+                <!-- Gráfico de Pareto -->
+                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Análise de Pareto (Top Gastos)</h2>
+                    <div class="chart-container">
+                        <canvas id="pareto-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Novo Gráfico de Ranking de Gastos por Descrição -->
+                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Ranking de Gastos por Descrição</h2>
+                    <div class="chart-container">
+                        <canvas id="spending-ranking-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Quantidade de Gastos por Categoria -->
+                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800">Gastos por Categoria</h2>
+                    <div class="chart-container">
+                        <canvas id="spending-quantity-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Evolução de Gastos -->
+                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
+                    <h2 class="text-xl font-bold text-gray-800">Evolução de Gastos</h2>
+                    <!-- Novos botões de filtro para o gráfico de evolução -->
+                    <div class="flex justify-center space-x-2 my-4">
+                        <button id="evolution-filter-day" class="evolution-filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
+                            Diário
+                        </button>
+                        <button id="evolution-filter-month" class="evolution-filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-700 text-white hover:bg-indigo-800 transition-colors">
+                            Mensal
+                        </button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="spending-evolution-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo da tela de Configuração (escondido por padrão) -->
+        <div id="settings-view" class="hidden">
+            <!-- Seção de Orçamento por Categoria -->
+            <div class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Orçamentos por Categoria</h2>
+                <form id="category-budget-form" class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
+                    <select id="budget-category-select" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="">Selecione a categoria</option>
+                        <!-- Opções serão preenchidas dinamicamente pelo JavaScript -->
+                    </select>
+                    <input type="number" id="budget-amount-input" placeholder="Definir orçamento (R$)" step="0.01"
+                            class="p-2 border border-gray-300 rounded-lg w-full sm:w-40 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <button type="submit" class="bg-indigo-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-indigo-600 transition-colors">Salvar Orçamento</button>
+                </form>
+                <div id="category-budget-list" class="space-y-2">
+                    <!-- Orçamentos por categoria serão renderizados aqui -->
+                </div>
+            </div>
+
+            <!-- Seção de gerenciamento de opções -->
+            <div class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Gerenciar Categorias e Formas de Pagamento</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-2">Categorias</h3>
+                        <form id="add-category-form" class="flex space-x-2 mb-4">
+                            <input type="text" id="new-category-input" placeholder="Nova categoria" required
+                                    class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <button type="submit" class="bg-gray-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-gray-600 transition-colors">Adicionar</button>
+                        </form>
+                        <ul id="category-list-manager" class="space-y-2">
+                            <!-- Lista de categorias será renderizada aqui -->
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-700 mb-2">Formas de Pagamento</h3>
+                        <form id="add-payment-form" class="flex space-x-2 mb-4">
+                            <input type="text" id="new-payment-input" placeholder="Nova forma de pagamento" required
+                                    class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                            <button type="submit" class="bg-gray-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-gray-600 transition-colors">Adicionar</button>
+                        </form>
+                        <ul id="payment-list-manager" class="space-y-2">
+                            <!-- Lista de pagamentos será renderizada aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Seção de Exportar e Importar Dados -->
+            <div class="bg-gray-100 p-4 rounded-xl shadow-inner mt-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-2">Backup e Restauração de Dados</h2>
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                    <button id="export-backup-button" class="w-full sm:w-1/2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-blue-600 transition-colors">
+                        Exportar Backup
+                    </button>
+                    <input type="file" id="import-data-file-input" accept=".json" class="hidden">
+                    <button id="import-data-button" class="w-full sm:w-1/2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-green-600 transition-colors">
+                        Importar Dados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis de dados locais
+        let allTransactions = [];
+        let categoryBudgets = {};
+        let customOptions = {
+            categories: ["Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Outros"],
+            paymentMethods: ["Crédito", "Débito", "Pix", "VA", "Dinheiro"]
+        };
+        let currentFilter = 'all';
+
+        // Seleciona os elementos do DOM
+        const mainView = document.getElementById('main-view');
+        const dashboardView = document.getElementById('dashboard-view');
+        const settingsView = document.getElementById('settings-view');
+        const showMainButton = document.getElementById('show-main-button');
+        const showDashboardButton = document.getElementById('show-dashboard-button');
+        const showSettingsButton = document.getElementById('show-settings-button');
+        const form = document.getElementById('transaction-form');
+        const categoryBudgetForm = document.getElementById('category-budget-form');
+        const descriptionInput = document.getElementById('description');
+        const detailInput = document.getElementById('detail');
+        const transactionDatetimeInput = document.getElementById('transaction-datetime');
+        const amountInput = document.getElementById('amount');
+        const paymentMethodInput = document.getElementById('payment-method');
+        const categoryInput = document.getElementById('category');
+        const budgetCategorySelect = document.getElementById('budget-category-select');
+        const budgetAmountInput = document.getElementById('budget-amount-input');
+        const categoryBudgetList = document.getElementById('category-budget-list');
+        const transactionList = document.getElementById('transaction-list');
+        const totalAmountElement = document.getElementById('total-amount');
+        const loadingMessage = document.getElementById('loading-message');
+        const filterButtons = document.querySelectorAll('.filter-button');
+        const startDateInput = document.getElementById('start-date-input');
+        const endDateInput = document.getElementById('end-date-input');
+        const filterByDateButton = document.getElementById('filter-by-date-button');
+        const submitButton = document.getElementById('submit-button');
+        const transactionIdToEditInput = document.getElementById('transaction-id-to-edit');
+        const exportButton = document.getElementById('export-button');
+        const pieChartCanvasMain = document.getElementById('spending-pie-chart-main').getContext('2d');
+        const addCategoryForm = document.getElementById('add-category-form');
+        const newCategoryInput = document.getElementById('new-category-input');
+        const categoryListManager = document.getElementById('category-list-manager');
+        const addPaymentForm = document.getElementById('add-payment-form');
+        const newPaymentInput = document.getElementById('new-payment-input');
+        const paymentListManager = document.getElementById('payment-list-manager');
+        const spendingVariationIndicator = document.getElementById('spending-variation');
+        const evolutionFilterDayBtn = document.getElementById('evolution-filter-day');
+        const evolutionFilterMonthBtn = document.getElementById('evolution-filter-month');
+        const exportBackupButton = document.getElementById('export-backup-button');
+        const importDataButton = document.getElementById('import-data-button');
+        const importDataFileInput = document.getElementById('import-data-file-input');
+        const themeToggleButton = document.getElementById('theme-toggle-button');
+        const themeIcon = document.getElementById('theme-icon');
+
+        // Novos elementos de filtro do dashboard
+        const dashboardFilterButtons = document.querySelectorAll('.dashboard-filter-button');
+        const dashboardStartDateInput = document.getElementById('dashboard-start-date-input');
+        const dashboardEndDateInput = document.getElementById('dashboard-end-date-input');
+        let currentDashboardFilter = 'month';
+        
+        let myPieChartMain = null;
+        let myParetoChart = null;
+        let mySpendingQuantityChart = null;
+        let mySpendingEvolutionChart = null;
+        let mySpendingRankingChart = null;
+        const defaultChartColors = ['#4c51bf', '#f97316', '#10b981', '#ef4444', '#3b82f6', '#eab308', '#9ca3af'];
+        const chartColors = {};
+
+        function loadDataFromLocalStorage() {
+            const storedTransactions = JSON.parse(localStorage.getItem('transactions')) || [];
+            allTransactions = storedTransactions.map(t => ({ ...t, timestamp: new Date(t.timestamp) }));
+            allTransactions.sort((a, b) => b.timestamp - a.timestamp); 
+
+            categoryBudgets = JSON.parse(localStorage.getItem('categoryBudgets')) || {};
+            customOptions = JSON.parse(localStorage.getItem('customOptions')) || {
+                categories: ["Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Outros"],
+                paymentMethods: ["Crédito", "Débito", "Pix", "VA", "Dinheiro"]
+            };
+        }
+
+        function saveDataToLocalStorage() {
+            localStorage.setItem('transactions', JSON.stringify(allTransactions));
+            localStorage.setItem('categoryBudgets', JSON.stringify(categoryBudgets));
+            localStorage.setItem('customOptions', JSON.stringify(customOptions));
+        }
+
+        function renderAll() {
+            renderDynamicOptions();
+            applyFilterAndRender();
+        }
+
+        // Adiciona event listeners para a navegação
+        showMainButton.addEventListener('click', () => {
+            mainView.classList.remove('hidden');
+            dashboardView.classList.add('hidden');
+            settingsView.classList.add('hidden');
+            showMainButton.classList.add('bg-indigo-600', 'text-white');
+            showDashboardButton.classList.remove('bg-indigo-600', 'text-white');
+            showDashboardButton.classList.add('bg-gray-200', 'text-gray-800');
+            showSettingsButton.classList.remove('bg-indigo-600', 'text-white');
+            showSettingsButton.classList.add('bg-gray-200', 'text-gray-800');
+        });
+
+        showDashboardButton.addEventListener('click', () => {
+            mainView.classList.add('hidden');
+            dashboardView.classList.remove('hidden');
+            settingsView.classList.add('hidden');
+            showDashboardButton.classList.add('bg-indigo-600', 'text-white');
+            showMainButton.classList.remove('bg-indigo-600', 'text-white');
+            showMainButton.classList.add('bg-gray-200', 'text-gray-800');
+            showSettingsButton.classList.remove('bg-indigo-600', 'text-white');
+            showSettingsButton.classList.add('bg-gray-200', 'text-gray-800');
+            applyDashboardFilterAndRender();
+        });
+
+        showSettingsButton.addEventListener('click', () => {
+            mainView.classList.add('hidden');
+            dashboardView.classList.add('hidden');
+            settingsView.classList.remove('hidden');
+            showSettingsButton.classList.add('bg-indigo-600', 'text-white');
+            showMainButton.classList.remove('bg-indigo-600', 'text-white');
+            showMainButton.classList.add('bg-gray-200', 'text-gray-800');
+            showDashboardButton.classList.remove('bg-indigo-600', 'text-white');
+            showDashboardButton.classList.add('bg-gray-200', 'text-gray-800');
+        });
+        
+        function renderDynamicOptions() {
+            const sortedCategories = [...customOptions.categories].sort();
+            const sortedPaymentMethods = [...customOptions.paymentMethods].sort();
+            
+            renderSelectOptions(categoryInput, sortedCategories, 'Selecione a categoria');
+            renderSelectOptions(budgetCategorySelect, sortedCategories, 'Selecione a categoria');
+            renderSelectOptions(paymentMethodInput, sortedPaymentMethods, 'Selecione a forma de pagamento');
+            renderOptionList(categoryListManager, sortedCategories, 'removeCategory');
+            renderOptionList(paymentListManager, sortedPaymentMethods, 'removePaymentMethod');
+        }
+
+        function renderSelectOptions(selectElement, options, placeholder) {
+            selectElement.innerHTML = `<option value="">${placeholder}</option>`;
+            options.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option;
+                optionElement.textContent = option;
+                selectElement.appendChild(optionElement);
+            });
+        }
+
+        function renderOptionList(listElement, options, removeFunctionName) {
+            listElement.innerHTML = '';
+            options.forEach(option => {
+                const listItem = document.createElement('li');
+                listItem.className = 'flex justify-between items-center bg-white p-2 rounded-lg shadow-sm';
+                listItem.innerHTML = `
+                    <span class="font-medium text-gray-800">${option}</span>
+                    <button class="text-xs text-red-500 hover:underline" onclick="${removeFunctionName}('${option}')">Remover</button>
+                `;
+                listElement.appendChild(listItem);
+            });
+        }
+
+        window.removeCategory = (category) => {
+            customOptions.categories = customOptions.categories.filter(c => c !== category);
+            saveDataToLocalStorage();
+            renderAll();
+        };
+
+        window.removePaymentMethod = (paymentMethod) => {
+            customOptions.paymentMethods = customOptions.paymentMethods.filter(p => p !== paymentMethod);
+            saveDataToLocalStorage();
+            renderAll();
+        };
+
+        function applyFilterAndRender() {
+            let filteredTransactions = [];
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            
+            switch (currentFilter) {
+                case 'day':
+                    filteredTransactions = allTransactions.filter(t => t.timestamp.toDateString() === today.toDateString());
+                    break;
+                case 'yesterday':
+                    filteredTransactions = allTransactions.filter(t => t.timestamp.toDateString() === yesterday.toDateString());
+                    break;
+                case 'week':
+                    const oneWeekAgo = new Date(now);
+                    oneWeekAgo.setDate(now.getDate() - 7);
+                    filteredTransactions = allTransactions.filter(t => t.timestamp >= oneWeekAgo);
+                    break;
+                case 'month':
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startOfMonth);
+                    break;
+                case 'date-range':
+                    const startDate = new Date(startDateInput.value);
+                    const endDate = new Date(endDateInput.value);
+                    if (startDate.toString() === 'Invalid Date' || endDate.toString() === 'Invalid Date' || startDate > endDate) {
+                        showModal('Por favor, insira um intervalo de datas válido.');
+                        currentFilter = 'all';
+                        resetActiveFilters();
+                        return;
+                    }
+                    endDate.setHours(23, 59, 59, 999); 
+                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startDate && t.timestamp <= endDate);
+                    break;
+                case 'all':
+                default:
+                    filteredTransactions = allTransactions;
+                    break;
+            }
+            
+            const total = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+            renderTransactions(filteredTransactions, total);
+            renderPieChart(filteredTransactions);
+            renderCategoryBudgets();
+            renderSpendingVariation(allTransactions);
+        }
+
+        function renderSpendingVariation(transactions) {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+
+            const spentToday = transactions
+                .filter(t => t.timestamp.toDateString() === today.toDateString())
+                .reduce((sum, transaction) => sum + transaction.amount, 0);
+            
+            const spentYesterday = transactions
+                .filter(t => t.timestamp.toDateString() === yesterday.toDateString())
+                .reduce((sum, transaction) => sum + transaction.amount, 0);
+
+            spendingVariationIndicator.innerHTML = '';
+
+            if (spentYesterday === 0 && spentToday > 0) {
+                spendingVariationIndicator.className = 'mt-2 text-sm font-semibold flex items-center justify-center space-x-2 text-green-600';
+                spendingVariationIndicator.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                    </svg>
+                    <span>+100% (gasto novo)</span>
+                `;
+            } else if (spentYesterday > 0 && spentToday === 0) {
+                spendingVariationIndicator.className = 'mt-2 text-sm font-semibold flex items-center justify-center space-x-2 text-red-600';
+                spendingVariationIndicator.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                    </svg>
+                    <span>-100% (sem gastos hoje)</span>
+                `;
+            } else if (spentYesterday > 0) {
+                const percentageChange = ((spentToday - spentYesterday) / spentYesterday) * 100;
+                let colorClass = 'text-gray-500';
+                let icon = '';
+
+                if (percentageChange > 0) {
+                    colorClass = 'text-red-600';
+                    icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>`;
+                } else if (percentageChange < 0) {
+                    colorClass = 'text-green-600';
+                    icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                            </svg>`;
+                } else {
+                    colorClass = 'text-gray-500';
+                    icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+                            </svg>`;
+                }
+                
+                spendingVariationIndicator.className = `mt-2 text-sm font-semibold flex items-center justify-center space-x-2 ${colorClass}`;
+                spendingVariationIndicator.innerHTML = `
+                    ${icon}
+                    <span>${percentageChange.toFixed(1).replace('.', ',')}% de hoje vs ontem</span>
+                `;
+            } else {
+                spendingVariationIndicator.className = 'mt-2 text-sm font-semibold flex items-center justify-center space-x-2 text-gray-500';
+                spendingVariationIndicator.textContent = 'Não há dados para comparar hoje e ontem.';
+            }
+        }
+
+        function renderTransactions(transactions, total) {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColorClass = isDarkMode ? 'text-gray-100' : 'text-gray-800';
+            const textMutedColorClass = isDarkMode ? 'text-gray-400' : 'text-gray-500';
+            const bgColorClass = isDarkMode ? 'bg-gray-700' : 'bg-white';
+
+            transactionList.innerHTML = '';
+
+            if (transactions.length === 0) {
+                loadingMessage.textContent = 'Nenhum gasto encontrado para este período.';
+                loadingMessage.style.display = 'block';
+            } else {
+                loadingMessage.style.display = 'none';
+                transactions.forEach(transaction => {
+                    const listItem = document.createElement('li');
+                    listItem.className = `flex justify-between items-center p-3 rounded-lg shadow-sm ${bgColorClass}`;
+                    
+                    const mainInfo = document.createElement('div');
+                    mainInfo.className = 'flex flex-col';
+                    
+                    const descriptionSpan = document.createElement('span');
+                    descriptionSpan.textContent = transaction.description;
+                    descriptionSpan.className = `font-medium ${textColorClass}`;
+                    
+                    const detailSpan = document.createElement('span');
+                    detailSpan.textContent = transaction.detail ? `Detalhe: ${transaction.detail}` : '';
+                    detailSpan.className = `text-xs ${textMutedColorClass}`;
+
+                    const dateTimeSpan = document.createElement('span');
+                    dateTimeSpan.textContent = transaction.timestamp.toLocaleString('pt-BR');
+                    dateTimeSpan.className = `text-xs ${textMutedColorClass}`;
+
+                    const paymentCategorySpan = document.createElement('span');
+                    paymentCategorySpan.textContent = `(${transaction.paymentMethod} - ${transaction.category})`;
+                    paymentCategorySpan.className = `text-xs ${textMutedColorClass}`;
+
+                    mainInfo.appendChild(descriptionSpan);
+                    if (transaction.detail) {
+                        mainInfo.appendChild(detailSpan);
+                    }
+                    mainInfo.appendChild(dateTimeSpan);
+                    mainInfo.appendChild(paymentCategorySpan);
+
+                    const rightSide = document.createElement('div');
+                    rightSide.className = 'flex items-center space-x-4';
+                    
+                    const amountSpan = document.createElement('span');
+                    amountSpan.textContent = `R$ ${transaction.amount.toFixed(2).replace('.', ',')}`;
+                    amountSpan.className = 'font-bold text-red-500';
+                    
+                    const editButton = document.createElement('button');
+                    editButton.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-blue-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.794.793-2.828-2.828.794-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                        </svg>`;
+                    editButton.onclick = () => loadTransactionForEdit(transaction.id);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-red-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                        </svg>`;
+                    deleteButton.onclick = () => deleteTransaction(transaction.id);
+
+                    rightSide.appendChild(amountSpan);
+                    rightSide.appendChild(editButton);
+                    rightSide.appendChild(deleteButton);
+                    
+                    listItem.appendChild(mainInfo);
+                    listItem.appendChild(rightSide);
+                    transactionList.appendChild(listItem);
+                });
+            }
+
+            totalAmountElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+        
+        function renderPieChart(transactions) {
+            const spendingByCategory = transactions.reduce((acc, transaction) => {
+                acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
+                return acc;
+            }, {});
+
+            const labels = Object.keys(spendingByCategory);
+            const data = Object.values(spendingByCategory);
+            const backgroundColors = labels.map((label, index) => chartColors[label] || defaultChartColors[index % defaultChartColors.length] || '#9ca3af');
+
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const legendColor = isDarkMode ? '#f3f4f6' : '#1f2937';
+
+            if (myPieChartMain) {
+                myPieChartMain.data.labels = labels;
+                myPieChartMain.data.datasets[0].data = data;
+                myPieChartMain.data.datasets[0].backgroundColor = backgroundColors;
+                myPieChartMain.options.plugins.legend.labels.color = legendColor;
+                myPieChartMain.update();
+            } else {
+                myPieChartMain = new Chart(pieChartCanvasMain, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { 
+                                position: 'top',
+                                labels: {
+                                    color: legendColor
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: R$ ${value.toFixed(2).replace('.', ',')} (${percentage}%)`;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                color: '#fff',
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+                                    const formattedValue = `R$ ${value.toFixed(2).replace('.', ',')}`;
+                                    if (percentage > 5) {
+                                        return `${formattedValue}\n(${percentage}%)`;
+                                    } else {
+                                        return '';
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            }
+        }
+        
+        function renderCategoryBudgets() {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const textColorClass = isDarkMode ? 'text-gray-100' : 'text-gray-800';
+            const textMutedColorClass = isDarkMode ? 'text-gray-400' : 'text-gray-600';
+            const bgColorClass = isDarkMode ? 'bg-gray-700' : 'bg-white';
+            const overBudgetBgClass = isDarkMode ? 'bg-red-800' : 'bg-red-100';
+
+            categoryBudgetList.innerHTML = '';
+            
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const monthlySpentByCategory = allTransactions
+                .filter(t => t.timestamp >= startOfMonth)
+                .reduce((acc, t) => {
+                    acc[t.category] = (acc[t.category] || 0) + t.amount;
+                    return acc;
+                }, {});
+
+            for (const category in categoryBudgets) {
+                const budgetAmount = categoryBudgets[category];
+                const spentAmount = monthlySpentByCategory[category] || 0;
+                const remaining = budgetAmount - spentAmount;
+                const percentage = budgetAmount > 0 ? (spentAmount / budgetAmount) * 100 : 0;
+                const isOverBudget = percentage > 100;
+
+                const listItem = document.createElement('div');
+                listItem.className = `p-3 rounded-lg shadow-sm ${isOverBudget ? overBudgetBgClass : bgColorClass}`;
+                
+                const header = document.createElement('div');
+                header.className = 'flex justify-between items-center mb-1';
+                header.innerHTML = `
+                    <h3 class="font-bold ${textColorClass}">${category}</h3>
+                    <button class="text-xs text-red-500 hover:underline" onclick="deleteCategoryBudget('${category}')">Remover</button>
+                `;
+
+                const amounts = document.createElement('div');
+                amounts.className = 'flex justify-between items-center text-sm';
+                amounts.innerHTML = `
+                    <p class="${textMutedColorClass}">Orçamento: <span class="font-semibold">R$ ${budgetAmount.toFixed(2).replace('.', ',')}</span></p>
+                    <p class="${isOverBudget ? 'text-red-500' : textMutedColorClass}">Restante: <span class="font-semibold">R$ ${remaining.toFixed(2).replace('.', ',')}</span></p>
+                `;
+
+                const progressBarContainer = document.createElement('div');
+                progressBarContainer.className = 'w-full bg-gray-200 rounded-full h-2.5 mt-2';
+                const progressBar = document.createElement('div');
+                progressBar.className = `budget-progress-bar h-2.5 rounded-full ${isOverBudget ? 'bg-red-500' : 'bg-indigo-600'}`;
+                progressBar.style.width = `${Math.min(percentage, 100)}%`;
+                progressBarContainer.appendChild(progressBar);
+
+                listItem.appendChild(header);
+                listItem.appendChild(amounts);
+                listItem.appendChild(progressBarContainer);
+                categoryBudgetList.appendChild(listItem);
+            }
+        }
+        
+        // Função central para filtrar os dados do dashboard
+        function applyDashboardFilterAndRender() {
+            let filteredTransactions = [];
+            const now = new Date();
+            
+            switch (currentDashboardFilter) {
+                case 'month':
+                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startOfMonth);
+                    break;
+                case 'week':
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setDate(now.getDate() - 7);
+                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startOfWeek);
+                    break;
+                case 'date-range':
+                    const startDate = new Date(dashboardStartDateInput.value);
+                    const endDate = new Date(dashboardEndDateInput.value);
+                    if (startDate.toString() === 'Invalid Date' || endDate.toString() === 'Invalid Date' || startDate > endDate) {
+                        showModal('Por favor, insira um intervalo de datas válido.');
+                        currentDashboardFilter = 'month';
+                        resetDashboardActiveFilters();
+                        return;
+                    }
+                    endDate.setHours(23, 59, 59, 999);
+                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startDate && t.timestamp <= endDate);
+                    break;
+                default:
+                    filteredTransactions = allTransactions;
+                    break;
+            }
+            renderDashboardCharts(filteredTransactions);
+        }
+
+        function renderDashboardCharts(transactions) {
+            renderParetoChart(transactions);
+            renderSpendingRankingChart(transactions); 
+            renderSpendingQuantityChart(transactions);
+            renderSpendingEvolutionChart(transactions, 'month');
+        }
+
+        function renderParetoChart(transactions) {
+            const spendingByCategory = transactions.reduce((acc, transaction) => {
+                acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
+                return acc;
+            }, {});
+
+            const sortedCategories = Object.keys(spendingByCategory).sort((a, b) => spendingByCategory[b] - spendingByCategory[a]);
+            const sortedSpending = sortedCategories.map(category => spendingByCategory[category]);
+            
+            const total = sortedSpending.reduce((sum, amount) => sum + amount, 0);
+            let cumulativePercentage = 0;
+            const cumulativeData = sortedSpending.map(amount => {
+                cumulativePercentage += (amount / total) * 100;
+                return cumulativePercentage;
+            });
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const axisColor = isDarkMode ? '#d1d5db' : '#1f2937';
+            const gridColor = isDarkMode ? '#4b5563' : '#e5e7eb';
+            const fontColor = isDarkMode ? '#d1d5db' : '#1f2937';
+
+            if (myParetoChart) {
+                myParetoChart.data.labels = sortedCategories;
+                myParetoChart.data.datasets[0].data = sortedSpending;
+                myParetoChart.data.datasets[1].data = cumulativeData;
+                myParetoChart.options.scales.y.ticks.color = axisColor;
+                myParetoChart.options.scales.y1.ticks.color = axisColor;
+                myParetoChart.options.scales.x.ticks.color = axisColor;
+                myParetoChart.options.scales.y.grid.color = gridColor;
+                myParetoChart.options.scales.x.grid.color = gridColor;
+                myParetoChart.options.plugins.legend.labels.color = fontColor;
+                myParetoChart.options.plugins.datalabels.color = fontColor;
+                myParetoChart.update();
+            } else {
+                myParetoChart = new Chart(document.getElementById('pareto-chart').getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: sortedCategories,
+                        datasets: [{
+                            label: 'Gastos por Categoria',
+                            data: sortedSpending,
+                            backgroundColor: '#4c51bf',
+                            yAxisID: 'y',
+                        }, {
+                            label: 'Percentual Acumulado',
+                            data: cumulativeData,
+                            backgroundColor: '#10b981',
+                            borderColor: '#10b981',
+                            type: 'line',
+                            fill: false,
+                            yAxisID: 'y1',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                beginAtZero: true,
+                                title: { display: true, text: 'Valor (R$)', color: axisColor },
+                                ticks: { color: axisColor },
+                                grid: { color: gridColor }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                min: 0,
+                                max: 100,
+                                title: { display: true, text: 'Percentual (%)', color: axisColor },
+                                grid: { drawOnChartArea: false },
+                                ticks: { color: axisColor }
+                            },
+                            x: {
+                                ticks: { color: axisColor },
+                                grid: { color: gridColor }
+                            }
+                        },
+                        plugins: {
+                            legend: { 
+                                labels: { color: fontColor }
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                formatter: (value, context) => {
+                                    if (context.datasetIndex === 0) {
+                                        return `R$ ${value.toFixed(2).replace('.', ',')}`;
+                                    } else {
+                                        return `${value.toFixed(1)}%`;
+                                    }
+                                },
+                                color: fontColor
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            }
+        }
+        
+        function renderSpendingQuantityChart(transactions) {
+            // Calcula o valor total gasto por categoria, não a quantidade
+            const spendingByCategory = transactions.reduce((acc, transaction) => {
+                acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
+                return acc;
+            }, {});
+
+            const labels = Object.keys(spendingByCategory);
+            const data = Object.values(spendingByCategory);
+            const backgroundColors = labels.map((label, index) => chartColors[label] || defaultChartColors[index % defaultChartColors.length] || '#9ca3af');
+
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const legendColor = isDarkMode ? '#f3f4f6' : '#1f2937';
+
+            if (mySpendingQuantityChart) {
+                mySpendingQuantityChart.data.labels = labels;
+                mySpendingQuantityChart.data.datasets[0].data = data;
+                mySpendingQuantityChart.data.datasets[0].backgroundColor = backgroundColors;
+                mySpendingQuantityChart.options.plugins.legend.labels.color = legendColor;
+                mySpendingQuantityChart.update();
+            } else {
+                mySpendingQuantityChart = new Chart(document.getElementById('spending-quantity-chart').getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            hoverOffset: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { 
+                                position: 'top',
+                                labels: {
+                                    color: legendColor
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        const label = context.label || '';
+                                        const value = context.parsed || 0;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `${label}: R$ ${value.toFixed(2).replace('.', ',')} (${percentage}%)`;
+                                    }
+                                }
+                            },
+                             datalabels: {
+                                color: '#fff',
+                                formatter: (value, context) => {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+                                    const formattedValue = `R$ ${value.toFixed(2).replace('.', ',')}`;
+                                    if (percentage > 5) {
+                                        return `${formattedValue}\n(${percentage}%)`;
+                                    } else {
+                                        return '';
+                                    }
+                                },
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            }
+        }
+        
+        function renderSpendingRankingChart(transactions) {
+            const spendingByDescription = transactions.reduce((acc, transaction) => {
+                const key = transaction.description;
+                acc[key] = (acc[key] || 0) + transaction.amount;
+                return acc;
+            }, {});
+
+            // Converte para um array, ordena e pega os 10 primeiros
+            const sortedDescriptions = Object.entries(spendingByDescription)
+                .sort(([, a], [, b]) => b - a)
+                .slice(0, 10);
+
+            const labels = sortedDescriptions.map(([description]) => description);
+            const data = sortedDescriptions.map(([, amount]) => amount);
+            const total = data.reduce((sum, amount) => sum + amount, 0);
+
+            const ctx = document.getElementById('spending-ranking-chart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, '#10b981');
+            gradient.addColorStop(1, '#6ee7b7');
+            
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const axisColor = isDarkMode ? '#d1d5db' : '#1f2937';
+
+            if (mySpendingRankingChart) {
+                mySpendingRankingChart.data.labels = labels;
+                mySpendingRankingChart.data.datasets[0].data = data;
+                mySpendingRankingChart.data.datasets[0].backgroundColor = gradient;
+                mySpendingRankingChart.options.scales.x.ticks.color = axisColor;
+                mySpendingRankingChart.options.scales.y.ticks.color = axisColor;
+                mySpendingRankingChart.options.plugins.datalabels.color = axisColor;
+                mySpendingRankingChart.update();
+            } else {
+                mySpendingRankingChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Valor Total',
+                            data: data,
+                            backgroundColor: gradient,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        indexAxis: 'y', // Define o eixo Y para ser o eixo das categorias
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: false },
+                                ticks: { color: axisColor }
+                            },
+                            x: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Valor (R$)', color: axisColor },
+                                ticks: { color: axisColor }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: (context) => {
+                                        const value = context.parsed.x; // Pega o valor do eixo X
+                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                        return `Valor: R$ ${value.toFixed(2).replace('.', ',')} (${percentage}%)`;
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'right', // Alinha o rótulo à direita da barra
+                                offset: 10,
+                                formatter: (value) => {
+                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
+                                    const formattedValue = `R$ ${value.toFixed(2).replace('.', ',')}`;
+                                    return `${formattedValue} (${percentage}%)`;
+                                },
+                                color: axisColor
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            }
+        }
+
+
+        function renderSpendingEvolutionChart(transactions, filter = 'month') {
+            const dataByPeriod = {};
+            
+            transactions.forEach(t => {
+                let key;
+                if (filter === 'day') {
+                    key = t.timestamp.toLocaleDateString('pt-BR');
+                } else if (filter === 'week') {
+                    const firstDayOfWeek = new Date(t.timestamp);
+                    const dayOfWeek = firstDayOfWeek.getDay(); // 0 = domingo, 1 = segunda...
+                    const diff = firstDayOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Ajusta para segunda-feira
+                    firstDayOfWeek.setDate(diff);
+                    const lastDayOfWeek = new Date(firstDayOfWeek);
+                    lastDayOfWeek.setDate(lastDayOfWeek.getDate() + 6);
+                    key = `${firstDayOfWeek.toLocaleDateString('pt-BR')} - ${lastDayOfWeek.toLocaleDateString('pt-BR')}`;
+                } else {
+                    key = t.timestamp.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                }
+                dataByPeriod[key] = (dataByPeriod[key] || 0) + t.amount;
+            });
+
+            const sortedKeys = Object.keys(dataByPeriod).sort((a, b) => {
+                const parseDate = (dateStr) => {
+                    const parts = dateStr.includes('/') ? dateStr.split(' ')[0].split('/') : null;
+                    if (parts && parts.length === 3) {
+                        return new Date(parts[2], parts[1] - 1, parts[0]);
+                    }
+                    const monthMap = { 'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11 };
+                    const [month, year] = dateStr.split(' de ');
+                    if (month && year) {
+                        return new Date(year, monthMap[month.toLowerCase()], 1);
+                    }
+                    return new Date(a);
+                };
+                const dateA = parseDate(a);
+                const dateB = parseDate(b);
+                return dateA - dateB;
+            });
+            const sortedData = sortedKeys.map(key => dataByPeriod[key]);
+            
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            const axisColor = isDarkMode ? '#d1d5db' : '#1f2937';
+            const gridColor = isDarkMode ? '#4b5563' : '#e5e7eb';
+            const fontColor = isDarkMode ? '#d1d5db' : '#1f2937';
+
+            if (mySpendingEvolutionChart) {
+                mySpendingEvolutionChart.data.labels = sortedKeys;
+                mySpendingEvolutionChart.data.datasets[0].data = sortedData;
+                mySpendingEvolutionChart.options.scales.x.ticks.color = axisColor;
+                mySpendingEvolutionChart.options.scales.y.ticks.color = axisColor;
+                mySpendingEvolutionChart.options.scales.y.grid.color = gridColor;
+                mySpendingEvolutionChart.options.scales.x.grid.color = gridColor;
+                mySpendingEvolutionChart.options.plugins.legend.labels.color = fontColor;
+                mySpendingEvolutionChart.options.plugins.datalabels.color = fontColor;
+                mySpendingEvolutionChart.update();
+            } else {
+                mySpendingEvolutionChart = new Chart(document.getElementById('spending-evolution-chart').getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: sortedKeys,
+                        datasets: [{
+                            label: 'Total de Gastos (R$)',
+                            data: sortedData,
+                            backgroundColor: '#4c51bf',
+                            borderColor: '#3c366b',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, title: { display: true, text: 'Valor (R$)', color: axisColor }, ticks: { color: axisColor }, grid: { color: gridColor } },
+                            x: { title: { display: true, text: filter === 'day' ? 'Dia' : 'Mês', color: axisColor }, ticks: { color: axisColor }, grid: { color: gridColor } }
+                        },
+                        plugins: {
+                            legend: { labels: { color: fontColor } },
+                             datalabels: {
+                                color: fontColor,
+                                align: 'top',
+                                display: (context) => context.dataset.data.length <= 15,
+                                formatter: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`
+                            }
+                        }
+                    },
+                    plugins: [ChartDataLabels]
+                });
+            }
+        }
+
+        evolutionFilterDayBtn.addEventListener('click', () => {
+            evolutionFilterDayBtn.classList.add('bg-indigo-700', 'text-white');
+            evolutionFilterMonthBtn.classList.remove('bg-indigo-700', 'text-white');
+            evolutionFilterDayBtn.classList.remove('bg-indigo-50', 'text-indigo-700');
+            evolutionFilterMonthBtn.classList.add('bg-indigo-50', 'text-indigo-700');
+            renderSpendingEvolutionChart(allTransactions, 'day');
+        });
+
+        evolutionFilterMonthBtn.addEventListener('click', () => {
+            evolutionFilterMonthBtn.classList.add('bg-indigo-700', 'text-white');
+            evolutionFilterDayBtn.classList.remove('bg-indigo-700', 'text-white');
+            evolutionFilterMonthBtn.classList.remove('bg-indigo-50', 'text-indigo-700');
+            evolutionFilterDayBtn.classList.add('bg-indigo-50', 'text-indigo-700');
+            renderSpendingEvolutionChart(allTransactions, 'month');
+        });
+
+        window.deleteCategoryBudget = (category) => {
+            delete categoryBudgets[category];
+            saveDataToLocalStorage();
+            renderAll();
+        };
+
+        function loadTransactionForEdit(id) {
+            const transaction = allTransactions.find(t => t.id === id);
+            if (transaction) {
+                descriptionInput.value = transaction.description;
+                detailInput.value = transaction.detail || '';
+                amountInput.value = transaction.amount;
+                paymentMethodInput.value = transaction.paymentMethod;
+                categoryInput.value = transaction.category;
+                
+                const formattedDate = transaction.timestamp.toISOString().slice(0, 16);
+                transactionDatetimeInput.value = formattedDate;
+
+                transactionIdToEditInput.value = transaction.id;
+                submitButton.textContent = 'Atualizar Gasto';
+                submitButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                submitButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
+            }
+        }
+        
+        function deleteTransaction(id) {
+            allTransactions = allTransactions.filter(t => t.id !== id);
+            saveDataToLocalStorage();
+            renderAll();
+        }
+
+        function updateTransaction(id, updatedData) {
+            const index = allTransactions.findIndex(t => t.id === id);
+            if (index !== -1) {
+                allTransactions[index] = { ...allTransactions[index], ...updatedData };
+            }
+            saveDataToLocalStorage();
+            resetForm();
+            renderAll();
+        }
+        
+        function resetForm() {
+            descriptionInput.value = '';
+            detailInput.value = '';
+            amountInput.value = '';
+            paymentMethodInput.value = '';
+            categoryInput.value = '';
+            transactionIdToEditInput.value = '';
+            
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            transactionDatetimeInput.value = now.toISOString().slice(0, 16);
+            
+            submitButton.textContent = 'Adicionar Gasto';
+            submitButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+            submitButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const description = descriptionInput.value.trim();
+            const detail = detailInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+            const paymentMethod = paymentMethodInput.value;
+            const category = categoryInput.value;
+            const transactionIdToEdit = transactionIdToEditInput.value;
+            const transactionDatetime = transactionDatetimeInput.value;
+
+            if (description && !isNaN(amount) && amount > 0 && paymentMethod && category && transactionDatetime) {
+                const transactionData = { 
+                    description, 
+                    detail,
+                    amount, 
+                    paymentMethod, 
+                    category,
+                    timestamp: new Date(transactionDatetime)
+                };
+                
+                if (transactionIdToEdit) {
+                    updateTransaction(transactionIdToEdit, transactionData);
+                } else {
+                    const newId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                    allTransactions.push({ id: newId, ...transactionData });
+                    saveDataToLocalStorage();
+                    resetForm();
+                    renderAll();
+                }
+            } else {
+                showModal('Por favor, preencha todos os campos corretamente.');
+            }
+        });
+        
+        categoryBudgetForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const category = budgetCategorySelect.value;
+            const budgetAmount = parseFloat(budgetAmountInput.value);
+
+            if (category && !isNaN(budgetAmount) && budgetAmount >= 0) {
+                categoryBudgets[category] = budgetAmount;
+                saveDataToLocalStorage();
+                budgetAmountInput.value = '';
+                budgetCategorySelect.value = '';
+                renderAll();
+            } else {
+                showModal('Por favor, selecione uma categoria e insira um valor válido para o orçamento.');
+            }
+        });
+
+        addCategoryForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newCategory = newCategoryInput.value.trim();
+            if (newCategory && !customOptions.categories.includes(newCategory)) {
+                customOptions.categories.push(newCategory);
+                saveDataToLocalStorage();
+                newCategoryInput.value = '';
+                renderAll();
+            } else if (customOptions.categories.includes(newCategory)) {
+                showModal('Essa categoria já existe.');
+            }
+        });
+
+        addPaymentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newPaymentMethod = newPaymentInput.value.trim();
+            if (newPaymentMethod && !customOptions.paymentMethods.includes(newPaymentMethod)) {
+                customOptions.paymentMethods.push(newPaymentMethod);
+                saveDataToLocalStorage();
+                newPaymentInput.value = '';
+                renderAll();
+            } else if (customOptions.paymentMethods.includes(newPaymentMethod)) {
+                showModal('Essa forma de pagamento já existe.');
+            }
+        });
+
+        // Adiciona event listeners para os botões de filtro da Tela Principal
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                resetActiveFilters();
+                
+                button.classList.add('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
+                button.classList.remove('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
+
+                if (button.id === 'filter-by-date-button') {
+                    const startDate = startDateInput.value;
+                    const endDate = endDateInput.value;
+                    if (startDate && endDate) {
+                        currentFilter = 'date-range';
+                        applyFilterAndRender();
+                    } else {
+                        showModal('Por favor, selecione uma data de início e de fim.');
+                        currentFilter = 'all';
+                        resetActiveFilters();
+                    }
+                } else {
+                    currentFilter = button.id.replace('filter-', '');
+                    startDateInput.value = '';
+                    endDateInput.value = '';
+                    applyFilterAndRender();
+                }
+            });
+        });
+
+        // Lógica de filtragem para o Dashboard
+        dashboardFilterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                resetDashboardActiveFilters();
+                button.classList.remove('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
+                button.classList.add('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
+
+                if (button.id === 'dashboard-filter-by-date-button') {
+                    const startDate = dashboardStartDateInput.value;
+                    const endDate = dashboardEndDateInput.value;
+                    if (startDate && endDate) {
+                        currentDashboardFilter = 'date-range';
+                    } else {
+                        showModal('Por favor, selecione um intervalo de datas válido.');
+                        currentDashboardFilter = 'month';
+                        resetDashboardActiveFilters();
+                        return;
+                    }
+                } else {
+                    currentDashboardFilter = button.id.replace('dashboard-filter-', '');
+                    dashboardStartDateInput.value = '';
+                    dashboardEndDateInput.value = '';
+                }
+                applyDashboardFilterAndRender();
+            });
+        });
+        
+        function resetActiveFilters() {
+            filterButtons.forEach(btn => {
+                btn.classList.remove('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
+                btn.classList.add('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
+            });
+            const allButton = document.getElementById('filter-all');
+            if (currentFilter === 'all' || !currentFilter) {
+                 allButton.classList.remove('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
+                 allButton.classList.add('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
+            }
+        }
+        
+        function resetDashboardActiveFilters() {
+             dashboardFilterButtons.forEach(btn => {
+                btn.classList.remove('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
+                btn.classList.add('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
+            });
+            const monthButton = document.getElementById('dashboard-filter-month');
+            if (currentDashboardFilter === 'month') {
+                monthButton.classList.remove('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
+                monthButton.classList.add('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
+            }
+        }
+
+        exportButton.addEventListener('click', () => {
+            if (allTransactions.length === 0) {
+                showModal('Não há dados para exportar.');
+                return;
+            }
+
+            const header = ['Descrição', 'Detalhe', 'Valor (R$)', 'Forma de Pagamento', 'Categoria', 'Data e Hora'];
+            const data = allTransactions.map(transaction => [
+                transaction.description,
+                transaction.detail || '',
+                transaction.amount,
+                transaction.paymentMethod,
+                transaction.category,
+                transaction.timestamp.toLocaleString('pt-BR')
+            ]);
+            
+            const worksheetData = [header, ...data];
+
+            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
+            
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Gastos');
+
+            XLSX.writeFile(wb, 'gastos.xlsx');
+
+            showModal('Dados exportados com sucesso!');
+        });
+
+        // Lógica de backup e restauração
+        exportBackupButton.addEventListener('click', () => {
+            const dataToExport = {
+                transactions: allTransactions,
+                categoryBudgets: categoryBudgets,
+                customOptions: customOptions
+            };
+            const jsonString = JSON.stringify(dataToExport, null, 2);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gastos_backup.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showModal('Backup exportado com sucesso!');
+        });
+        
+        importDataButton.addEventListener('click', () => {
+            importDataFileInput.click();
+        });
+
+        importDataFileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (importedData.transactions && importedData.categoryBudgets && importedData.customOptions) {
+                        allTransactions = importedData.transactions.map(t => ({ ...t, timestamp: new Date(t.timestamp) }));
+                        categoryBudgets = importedData.categoryBudgets;
+                        customOptions = importedData.customOptions;
+                        saveDataToLocalStorage();
+                        renderAll();
+                        showModal('Dados importados com sucesso! O aplicativo foi atualizado.');
+                    } else {
+                        showModal('O arquivo selecionado não tem o formato de backup esperado.');
+                    }
+                } catch (error) {
+                    console.error("Erro ao importar o arquivo:", error);
+                    showModal('Erro ao processar o arquivo. Certifique-se de que é um arquivo JSON válido.');
+                }
+                importDataFileInput.value = '';
+            };
+            reader.readAsText(file);
+        });
+
+        function showModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm mx-auto z-50">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Atenção</h3>
+                    <p class="text-gray-700 mb-4">${message}</p>
+                    <div class="flex justify-end">
+                        <button class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors" onclick="this.closest('.fixed').remove()">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Lógica de Tema Claro/Escuro
+        function applyTheme(theme) {
+            const htmlElement = document.documentElement;
+            if (theme === 'dark') {
+                htmlElement.classList.add('dark');
+                themeIcon.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                htmlElement.classList.remove('dark');
+                themeIcon.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            }
+            // Recarrega os gráficos com o novo tema
+            if (myPieChartMain) myPieChartMain.destroy();
+            if (myParetoChart) myParetoChart.destroy();
+            if (mySpendingQuantityChart) mySpendingQuantityChart.destroy();
+            if (mySpendingRankingChart) mySpendingRankingChart.destroy();
+            if (mySpendingEvolutionChart) mySpendingEvolutionChart.destroy();
+
+            myPieChartMain = null;
+            myParetoChart = null;
+            mySpendingQuantityChart = null;
+            mySpendingRankingChart = null;
+            mySpendingEvolutionChart = null;
+
+            renderAll();
+            applyDashboardFilterAndRender();
+        }
+        
+        themeToggleButton.addEventListener('click', () => {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+        });
+
+        // Inicializa o aplicativo carregando os dados e renderizando a interface
+        window.onload = () => {
+            loadDataFromLocalStorage();
+            renderAll();
+            resetActiveFilters();
+            resetDashboardActiveFilters();
+            resetForm();
+
+            // Carrega o tema salvo no localStorage
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            applyTheme(savedTheme);
+        };
+
+    </script>
+</body>
+</html>
