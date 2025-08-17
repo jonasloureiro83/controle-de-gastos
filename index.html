@@ -1,1650 +1,998 @@
 <!DOCTYPE html>
-<html lang="pt-br" class="light">
+<html lang="pt">
 <head>
+    <base target="_top">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Gastos</title>
-    <!-- Inclui o Tailwind CSS para um estilo moderno e responsivo -->
+    <title>Sistema de Gestão Financeira</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ** IMPORTANTE: Configuração para ativar o modo escuro manual do Tailwind ** -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Plugin para mostrar os rótulos de dados no gráfico -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Variáveis CSS para o tema claro */
-        :root {
-            --bg-color: #f3f4f6;
-            --text-color: #1f2937;
-            --card-bg: #ffffff;
-            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --input-border-color: #d1d5db;
-            --input-focus-color: #4f46e5;
-            --primary-button-bg: #4f46e5;
-            --primary-button-hover-bg: #4338ca;
-            --secondary-button-bg: #e5e7eb;
-            --secondary-button-hover-bg: #d1d5db;
-            --text-gray-800: #1f2937;
-            --text-gray-700: #374151;
-            --text-gray-500: #6b7280;
-            --indigo-bg-100: #c7d2fe;
-            --indigo-text-900: #312e81;
-            --indigo-text-800: #3730a3;
-            --indigo-text-700: #4338ca;
-            --chart-bg: #ffffff;
-            --chart-grid-color: #e5e7eb;
-            --chart-text-color: #1f2937;
-        }
-        /* Variáveis CSS para o tema escuro */
-        .dark {
-            --bg-color: #111827;
-            --text-color: #f3f4f6;
-            --card-bg: #1f2937;
-            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
-            --input-border-color: #4b5563;
-            --input-focus-color: #818cf8;
-            --primary-button-bg: #4338ca;
-            --primary-button-hover-bg: #3730a3;
-            --secondary-button-bg: #4b5563;
-            --secondary-button-hover-bg: #6b7280;
-            --text-gray-800: #d1d5db;
-            --text-gray-700: #9ca3af;
-            --text-gray-500: #9ca3af;
-            --indigo-bg-100: #312e81;
-            --indigo-text-900: #c7d2fe;
-            --indigo-text-800: #eef2ff;
-            --indigo-text-700: #a5b4fc;
-            --chart-bg: #1f2937;
-            --chart-grid-color: #4b5563;
-            --chart-text-color: #d1d5db;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        
-        .bg-white { background-color: var(--card-bg); }
-        .shadow-2xl { box-shadow: var(--card-shadow); }
-        .bg-gray-100 { background-color: var(--secondary-button-bg); }
-        .bg-gray-50 { background-color: var(--secondary-button-bg); }
-        .text-gray-800 { color: var(--text-gray-800); }
-        .text-gray-700 { color: var(--text-gray-700); }
-        .text-gray-500 { color: var(--text-gray-500); }
-        .text-red-500 { color: #ef4444; }
-        .text-green-600 { color: #16a34a; }
-        .bg-indigo-600 { background-color: var(--primary-button-bg); }
-        .hover\:bg-indigo-700:hover { background-color: var(--primary-button-hover-bg); }
-        .bg-indigo-50 { background-color: var(--secondary-button-bg); }
-        .text-indigo-700 { color: var(--indigo-text-700); }
-        .bg-indigo-100 { background-color: var(--indigo-bg-100); }
-        .text-indigo-900 { color: var(--indigo-text-900); }
-        .text-indigo-800 { color: var(--indigo-text-800); }
-        
-        .budget-progress-bar {
-            transition: width 0.5s ease-in-out;
-        }
-        .chart-container {
-            position: relative;
-            height: 400px;
-            width: 100%;
-            background-color: var(--chart-bg);
-            padding: 1rem;
-            border-radius: 0.5rem;
-        }
-        .loading-spinner {
-            border: 4px solid var(--text-gray-800);
-            border-top: 4px solid var(--input-focus-color);
+        body { font-family: 'Inter', sans-serif; }
+        .modal { transition: opacity 0.3s ease; }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+            border-left-color: #4f46e5;
+            animation: spin 1s ease infinite;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Estilos para inputs e selects para tema escuro */
-        .p-3.border.border-gray-300,
-        .p-2.border.border-gray-300 {
-            background-color: var(--card-bg);
-            border-color: var(--input-border-color);
-            color: var(--text-color);
-        }
-        .p-3.border.border-gray-300:focus,
-        .p-2.border.border-gray-300:focus {
-            border-color: var(--input-focus-color);
-        }
-        .text-gray-400 { color: #9ca3af; }
-        .dark .text-gray-400 { color: #6b7280; }
     </style>
-    <!-- Bibliotecas de terceiros para gráficos e exportação -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white p-6 rounded-3xl shadow-2xl w-full max-w-4xl">
-        <h1 class="text-3xl font-extrabold text-center mb-6 text-gray-800">Controle de Gastos</h1>
-        
-        <!-- Botões de navegação entre as telas -->
-        <div class="flex justify-center space-x-4 mb-6">
-            <button id="show-main-button" class="px-6 py-2 rounded-full text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors">
-                Tela Principal
-            </button>
-            <button id="show-dashboard-button" class="px-6 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">
-                Dashboard
-            </button>
-            <button id="show-settings-button" class="px-6 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">
-                Configuração
-            </button>
-            <!-- Botão para alternar tema -->
-            <button id="theme-toggle-button" class="px-4 py-2 rounded-full text-sm font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">
-                <span id="theme-icon">🌙</span>
-            </button>
-        </div>
+<body class="bg-gray-100 dark:bg-gray-900">
 
-        <!-- Conteúdo da tela principal (visível por padrão) -->
-        <div id="main-view">
-            <!-- Formulário para adicionar/editar nova transação -->
-            <form id="transaction-form" class="space-y-4 mb-6">
-                <!-- Campo oculto para armazenar o ID da transação em edição -->
-                <input type="hidden" id="transaction-id-to-edit" value="">
-                
-                <div class="flex flex-col relative">
-                    <label for="description" class="text-sm font-medium mb-1 text-gray-700">Descrição da Compra</label>
-                    <input type="text" id="description" placeholder="Ex: Mercado, Combustível, Jantar" required
-                            class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+    <!-- Ecrã de Login -->
+    <section id="login-section" class="flex items-center justify-center h-screen bg-gray-200 dark:bg-gray-800">
+        <div class="w-full max-w-md bg-white dark:bg-gray-700 rounded-lg shadow-md p-8 relative">
+            <!-- Botão de Tema Adicionado -->
+            <button id="login-theme-toggle-btn" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg p-2 focus:outline-none"></button>
+            
+            <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-white mb-8">Login do Sistema</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="email" class="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">Email</label>
+                    <input type="email" id="email" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-600 dark:border-gray-500 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
-                <!-- Novo campo de detalhes -->
-                <div class="flex flex-col relative">
-                    <label for="detail" class="text-sm font-medium mb-1 text-gray-700">Detalhe (opcional)</label>
-                    <input type="text" id="detail" placeholder="Ex: Ração de cachorro, jantar com amigos"
-                            class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">Senha</label>
+                    <input type="password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-600 dark:border-gray-500 mb-3 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                    <!-- Campo de data e hora atualizado -->
-                    <div class="flex flex-col">
-                        <label for="transaction-datetime" class="text-sm font-medium mb-1 text-gray-700">Data e Hora da Compra</label>
-                        <input type="datetime-local" id="transaction-datetime" required
-                                class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="amount" class="text-sm font-medium mb-1 text-gray-700">Valor (R$)</label>
-                        <input type="number" id="amount" placeholder="Ex: 50.00" required step="0.01"
-                                class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="payment-method" class="text-sm font-medium mb-1 text-gray-700">Forma de Pagamento</label>
-                        <select id="payment-method" required
-                                class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                            <option value="">Selecione a forma de pagamento</option>
-                            <!-- Opções serão preenchidas dinamicamente pelo JavaScript -->
-                        </select>
-                    </div>
-                    <div class="flex flex-col">
-                        <label for="category" class="text-sm font-medium mb-1 text-gray-700">Categoria</label>
-                        <select id="category" required
-                                class="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                            <option value="">Selecione a categoria</option>
-                            <!-- Opções serão preenchidas dinamicamente pelo JavaScript -->
-                        </select>
-                    </div>
+                <div id="error-message" class="text-red-500 text-xs italic mb-4"></div>
+                <div class="flex items-center justify-between">
+                    <button id="login-btn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Entrar</button>
+                    <button id="register-btn" type="button" class="inline-block align-baseline font-bold text-sm text-indigo-500 hover:text-indigo-400">Registar Nova Conta</button>
                 </div>
-                <button type="submit" id="submit-button"
-                        class="w-full bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105">
-                    Adicionar Gasto
-                </button>
             </form>
-            
-            <!-- Seção de filtros de relatório -->
-            <div class="mt-6 mb-4 flex justify-center space-x-2 flex-wrap">
-                <button id="filter-day" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
-                    Diário
-                </button>
-                <button id="filter-yesterday" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
-                    Ontem
-                </button>
-                <button id="filter-week" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
-                    Semanal
-                </button>
-                <button id="filter-month" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
-                    Mensal
-                </button>
-                <button id="filter-all" class="filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors active">
-                    Todos
-                </button>
-            </div>
-            
-            <!-- Filtro por período de datas -->
-            <div class="mt-6 p-4 bg-white rounded-xl shadow-inner">
-                <h3 class="text-lg font-semibold text-gray-700 mb-2">Filtrar por Período</h3>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 items-center">
-                    <input type="date" id="start-date-input" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                    <span class="text-gray-500">até</span>
-                    <input type="date" id="end-date-input" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                    <button id="filter-by-date-button" class="filter-button w-full sm:w-auto bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-indigo-600 transition-colors">
-                        Aplicar Filtro
-                    </button>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                <!-- Seção para exibir a lista de transações -->
-                <div class="bg-gray-50 p-4 rounded-xl shadow-inner col-span-1">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Histórico de Transações</h2>
-                    <p id="loading-message" class="text-center text-gray-500">Nenhum gasto encontrado.</p>
-                    <ul id="transaction-list" class="space-y-2">
-                        <!-- As transações serão adicionadas aqui pelo JavaScript -->
-                    </ul>
-                </div>
-                
-                <!-- Seção para exibir o gráfico na tela principal -->
-                <div class="bg-gray-50 p-4 rounded-xl shadow-inner flex flex-col justify-between col-span-1 space-y-6">
-                    <div>
-                        <h2 class="text-xl font-bold mb-4 text-gray-800">Distribuição de Gastos por Categoria</h2>
-                        <canvas id="spending-pie-chart-main"></canvas>
-                    </div>
-                    <div class="mt-4">
-                        <button id="export-button"
-                            class="w-full bg-green-600 text-white font-semibold py-3 rounded-xl hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-300 transform hover:scale-105">
-                            Exportar para XLSX
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Seção para exibir o total dos gastos -->
-            <div class="mt-6 p-4 bg-indigo-100 rounded-xl text-center shadow-lg">
-                <h2 class="text-xl font-bold text-indigo-800">Total de Gastos</h2 >
-                <p id="total-amount" class="text-4xl font-extrabold mt-2 text-indigo-900">R$ 0,00</p>
-                <!-- Novo indicador de variação de gastos -->
-                <div id="spending-variation" class="mt-2 text-sm font-semibold flex items-center justify-center space-x-2">
-                    <!-- O conteúdo será adicionado via JavaScript -->
-                </div>
-            </div>
         </div>
+    </section>
 
-        <!-- Conteúdo do Dashboard (escondido por padrão) -->
-        <div id="dashboard-view" class="hidden">
-            <div class="space-y-6">
-                <!-- Filtros para o Dashboard -->
-                <div class="mt-6 mb-4 p-4 bg-white rounded-xl shadow-inner flex flex-wrap justify-center space-x-2">
-                    <button id="dashboard-filter-month" class="dashboard-filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors active">
-                        Mensal
-                    </button>
-                    <button id="dashboard-filter-week" class="dashboard-filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
-                        Semanal
-                    </button>
-                    <input type="date" id="dashboard-start-date-input" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow sm:flex-grow-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                    <span class="text-gray-500">até</span>
-                    <input type="date" id="dashboard-end-date-input" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow sm:flex-grow-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                    <button id="dashboard-filter-by-date-button" class="dashboard-filter-button w-full sm:w-auto bg-indigo-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-indigo-600 transition-colors">
-                        Aplicar Filtro
+    <!-- Sistema Principal (Oculto por padrão) -->
+    <div id="app-section" class="hidden h-screen">
+        <div class="flex h-full">
+            <!-- Barra Lateral de Navegação -->
+            <aside id="sidebar" class="bg-gray-800 text-white flex flex-col transition-all duration-300">
+                <div class="h-16 flex items-center justify-center">
+                    <span id="sidebar-title" class="text-2xl font-bold transition-all duration-300 whitespace-nowrap">Meu Sistema</span>
+                </div>
+                <nav class="flex-1 px-2 py-4 space-y-2">
+                    <a href="#" id="nav-gastos" class="nav-link flex items-center px-4 py-2 text-gray-100 bg-gray-900 rounded-md">
+                        <svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg>
+                        <span class="sidebar-text">Gastos</span>
+                    </a>
+                    <a href="#" id="nav-dashboard" class="nav-link flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md">
+                        <svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <span class="sidebar-text">Dashboard</span>
+                    </a>
+                </nav>
+                <div class="px-2 py-4">
+                    <button id="sidebar-toggle-btn" title="Minimizar barra lateral" class="w-full flex items-center justify-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md mb-2"></button>
+                    <div id="user-info" class="text-center text-sm text-gray-400 mb-2 sidebar-text"></div>
+                    <button id="theme-toggle-btn" class="w-full flex items-center justify-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md mb-2"></button>
+                    <button id="logout-btn" class="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md">
+                        <svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        <span class="sidebar-text">Sair</span>
                     </button>
                 </div>
+            </aside>
+
+            <!-- Conteúdo Principal -->
+            <main class="flex-1 p-10 overflow-y-auto">
+                <!-- Seção de Gastos -->
+                <section id="section-gastos" class="page-section">
+                    <!-- Cards de Resumo -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Gasto Hoje</h3><p id="summary-today" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Gasto Ontem</h3><p id="summary-yesterday" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Esta Semana</h3><p id="summary-week" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Este Mês</h3><p id="summary-month" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Média Diária</h3><p id="summary-avg-daily" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                    </div>
+                    <!-- Gráfico e Formulário -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                        <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Gastos nos Últimos 7 Dias</h2>
+                            <canvas id="expenses-chart"></canvas>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Lançar Gasto</h2>
+                            <form id="expense-form">
+                                <input type="hidden" id="expenseId">
+                                <div class="space-y-4">
+                                    <input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                    <input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <input type="datetime-local" id="expenseDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                    <input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                    <select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><option>Crédito</option><option>Dinheiro</option><option>Débito</option><option>Pix</option><option>VA</option></select>
+                                    <div class="flex items-center space-x-2">
+                                        <select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
+                                        <button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button>
+                                    </div>
+                                    <button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button>
+                                    <button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Filtros e Tabela de Gastos -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+                        <div class="p-4 flex flex-col sm:flex-row flex-wrap items-center gap-4 dark:text-white">
+                            <h3 class="text-lg font-semibold w-full sm:w-auto">Lançamentos</h3>
+                            <div class="flex-grow"></div>
+                            <input type="search" id="filter-description" placeholder="Pesquisar descrição..." class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                            <select id="filter-category" class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600"></select>
+                            <select id="filter-payment" class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600"></select>
+                            <button id="clear-filters-btn" class="w-full sm:w-auto bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500">Limpar</button>
+                        </div>
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="expenses-table">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Data</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Descrição</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Categoria</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Pagamento</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Valor</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenses-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                </section>
                 
-                <!-- Gráfico de Pareto -->
-                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Análise de Pareto (Top Gastos)</h2>
-                    <div class="chart-container">
-                        <canvas id="pareto-chart"></canvas>
+                <!-- Seção de Dashboard -->
+                <section id="section-dashboard" class="page-section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+                         <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-0">Dashboard de Análises</h1>
+                         <div class="flex items-center space-x-2">
+                            <label for="dashboard-month-filter" class="text-gray-600 dark:text-gray-300">Mês:</label>
+                            <select id="dashboard-month-filter" class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600"></select>
+                         </div>
                     </div>
-                </div>
-
-                <!-- Novo Gráfico de Ranking de Gastos por Descrição -->
-                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Ranking de Gastos por Descrição</h2>
-                    <div class="chart-container">
-                        <canvas id="spending-ranking-chart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico de Quantidade de Gastos por Categoria -->
-                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Gastos por Categoria</h2>
-                    <div class="chart-container">
-                        <canvas id="spending-quantity-chart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico de Evolução de Gastos -->
-                <div class="bg-gray-50 p-4 rounded-xl shadow-inner">
-                    <h2 class="text-xl font-bold text-gray-800">Evolução de Gastos</h2>
-                    <!-- Novos botões de filtro para o gráfico de evolução -->
-                    <div class="flex justify-center space-x-2 my-4">
-                        <button id="evolution-filter-day" class="evolution-filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-200 transition-colors">
-                            Diário
-                        </button>
-                        <button id="evolution-filter-month" class="evolution-filter-button px-4 py-2 rounded-full text-sm font-medium bg-indigo-700 text-white hover:bg-indigo-800 transition-colors">
-                            Mensal
-                        </button>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="spending-evolution-chart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Conteúdo da tela de Configuração (escondido por padrão) -->
-        <div id="settings-view" class="hidden">
-            <!-- Seção de Orçamento por Categoria -->
-            <div class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-2">Orçamentos por Categoria</h2>
-                <form id="category-budget-form" class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
-                    <select id="budget-category-select" class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="">Selecione a categoria</option>
-                        <!-- Opções serão preenchidas dinamicamente pelo JavaScript -->
-                    </select>
-                    <input type="number" id="budget-amount-input" placeholder="Definir orçamento (R$)" step="0.01"
-                            class="p-2 border border-gray-300 rounded-lg w-full sm:w-40 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <button type="submit" class="bg-indigo-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-indigo-600 transition-colors">Salvar Orçamento</button>
-                </form>
-                <div id="category-budget-list" class="space-y-2">
-                    <!-- Orçamentos por categoria serão renderizados aqui -->
-                </div>
-            </div>
-
-            <!-- Seção de gerenciamento de opções -->
-            <div class="bg-gray-100 p-4 rounded-xl shadow-inner mb-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">Gerenciar Categorias e Formas de Pagamento</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h3 class="font-semibold text-gray-700 mb-2">Categorias</h3>
-                        <form id="add-category-form" class="flex space-x-2 mb-4">
-                            <input type="text" id="new-category-input" placeholder="Nova categoria" required
-                                    class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                            <button type="submit" class="bg-gray-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-gray-600 transition-colors">Adicionar</button>
-                        </form>
-                        <ul id="category-list-manager" class="space-y-2">
-                            <!-- Lista de categorias será renderizada aqui -->
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-gray-700 mb-2">Formas de Pagamento</h3>
-                        <form id="add-payment-form" class="flex space-x-2 mb-4">
-                            <input type="text" id="new-payment-input" placeholder="Nova forma de pagamento" required
-                                    class="p-2 border border-gray-300 rounded-lg text-sm flex-grow focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
-                            <button type="submit" class="bg-gray-500 text-white py-2 px-4 rounded-lg text-sm hover:bg-gray-600 transition-colors">Adicionar</button>
-                        </form>
-                        <ul id="payment-list-manager" class="space-y-2">
-                            <!-- Lista de pagamentos será renderizada aqui -->
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Seção de Exportar e Importar Dados -->
-            <div class="bg-gray-100 p-4 rounded-xl shadow-inner mt-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-2">Backup e Restauração de Dados</h2>
-                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                    <button id="export-backup-button" class="w-full sm:w-1/2 bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-blue-600 transition-colors">
-                        Exportar Backup
-                    </button>
-                    <input type="file" id="import-data-file-input" accept=".json" class="hidden">
-                    <button id="import-data-button" class="w-full sm:w-1/2 bg-green-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-green-600 transition-colors">
-                        Importar Dados
-                    </button>
-                </div>
-            </div>
+                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div id="monthly-chart-container" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h2 id="monthly-chart-title" class="text-xl font-bold mb-4 text-gray-800 dark:text-white"></h2>
+                            <canvas id="monthly-chart"></canvas>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Pareto de Gastos por Categoria</h2>
+                            <canvas id="category-pareto-chart"></canvas>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Pareto de Gastos por Dia da Semana</h2>
+                            <canvas id="weekday-pareto-chart"></canvas>
+                        </div>
+                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Ranking de Gastos por Descrição</h2>
+                            <canvas id="description-ranking-chart"></canvas>
+                        </div>
+                     </div>
+                </section>
+            </main>
         </div>
     </div>
 
-    <script>
-        // Variáveis de dados locais
-        let allTransactions = [];
-        let categoryBudgets = {};
-        let customOptions = {
-            categories: ["Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Outros"],
-            paymentMethods: ["Crédito", "Débito", "Pix", "VA", "Dinheiro"]
-        };
-        let currentFilter = 'all';
+    <!-- Modal de Categorias -->
+    <div id="category-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden opacity-0">
+        <div class="bg-white dark:bg-gray-700 rounded-lg shadow-xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6 dark:text-white">Gerir Categorias</h2>
+            <form id="add-category-form" class="flex items-center space-x-2 mb-4">
+                <input type="text" id="newCategoryName" placeholder="Nova categoria" class="w-full p-2 border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
+                <button type="submit" class="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Adicionar</button>
+            </form>
+            <div id="category-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
+            <button id="close-category-modal-btn" class="mt-6 w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600">Fechar</button>
+        </div>
+    </div>
 
-        // Seleciona os elementos do DOM
-        const mainView = document.getElementById('main-view');
-        const dashboardView = document.getElementById('dashboard-view');
-        const settingsView = document.getElementById('settings-view');
-        const showMainButton = document.getElementById('show-main-button');
-        const showDashboardButton = document.getElementById('show-dashboard-button');
-        const showSettingsButton = document.getElementById('show-settings-button');
-        const form = document.getElementById('transaction-form');
-        const categoryBudgetForm = document.getElementById('category-budget-form');
-        const descriptionInput = document.getElementById('description');
-        const detailInput = document.getElementById('detail');
-        const transactionDatetimeInput = document.getElementById('transaction-datetime');
-        const amountInput = document.getElementById('amount');
-        const paymentMethodInput = document.getElementById('payment-method');
-        const categoryInput = document.getElementById('category');
-        const budgetCategorySelect = document.getElementById('budget-category-select');
-        const budgetAmountInput = document.getElementById('budget-amount-input');
-        const categoryBudgetList = document.getElementById('category-budget-list');
-        const transactionList = document.getElementById('transaction-list');
-        const totalAmountElement = document.getElementById('total-amount');
-        const loadingMessage = document.getElementById('loading-message');
-        const filterButtons = document.querySelectorAll('.filter-button');
-        const startDateInput = document.getElementById('start-date-input');
-        const endDateInput = document.getElementById('end-date-input');
-        const filterByDateButton = document.getElementById('filter-by-date-button');
-        const submitButton = document.getElementById('submit-button');
-        const transactionIdToEditInput = document.getElementById('transaction-id-to-edit');
-        const exportButton = document.getElementById('export-button');
-        const pieChartCanvasMain = document.getElementById('spending-pie-chart-main').getContext('2d');
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAL8d8aHshkzIhkGOr6gQD8LlkwxcOqOGY",
+            authDomain: "sistema-vendas-dcb7e.firebaseapp.com",
+            projectId: "sistema-vendas-dcb7e",
+            storageBucket: "sistema-vendas-dcb7e.firebasestorage.app",
+            messagingSenderId: "557933299875",
+            appId: "1:557933299875:web:12dd1f59065001ff961716"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // --- ELEMENTOS GLOBAIS ---
+        const loginSection = document.getElementById('login-section');
+        const appSection = document.getElementById('app-section');
+        const userInfo = document.getElementById('user-info');
+        const errorMessage = document.getElementById('error-message');
+        const expenseForm = document.getElementById('expense-form');
+        const expensesBody = document.getElementById('expenses-body');
+        const categoryModal = document.getElementById('category-modal');
+        const categoryList = document.getElementById('category-list');
         const addCategoryForm = document.getElementById('add-category-form');
-        const newCategoryInput = document.getElementById('new-category-input');
-        const categoryListManager = document.getElementById('category-list-manager');
-        const addPaymentForm = document.getElementById('add-payment-form');
-        const newPaymentInput = document.getElementById('new-payment-input');
-        const paymentListManager = document.getElementById('payment-list-manager');
-        const spendingVariationIndicator = document.getElementById('spending-variation');
-        const evolutionFilterDayBtn = document.getElementById('evolution-filter-day');
-        const evolutionFilterMonthBtn = document.getElementById('evolution-filter-month');
-        const exportBackupButton = document.getElementById('export-backup-button');
-        const importDataButton = document.getElementById('import-data-button');
-        const importDataFileInput = document.getElementById('import-data-file-input');
-        const themeToggleButton = document.getElementById('theme-toggle-button');
-        const themeIcon = document.getElementById('theme-icon');
-
-        // Novos elementos de filtro do dashboard
-        const dashboardFilterButtons = document.querySelectorAll('.dashboard-filter-button');
-        const dashboardStartDateInput = document.getElementById('dashboard-start-date-input');
-        const dashboardEndDateInput = document.getElementById('dashboard-end-date-input');
-        let currentDashboardFilter = 'month';
+        const expenseCategorySelect = document.getElementById('expenseCategory');
+        const filterDescription = document.getElementById('filter-description');
+        const filterCategorySelect = document.getElementById('filter-category');
+        const filterPaymentSelect = document.getElementById('filter-payment');
+        const dashboardMonthFilter = document.getElementById('dashboard-month-filter');
+        const loginThemeToggleButton = document.getElementById('login-theme-toggle-btn');
+        const themeToggleButton = document.getElementById('theme-toggle-btn');
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+        const sidebarTexts = document.querySelectorAll('.sidebar-text');
+        const sidebarTitle = document.getElementById('sidebar-title');
+        const navLinks = document.querySelectorAll('.nav-link');
+        const logoutBtn = document.getElementById('logout-btn');
         
-        let myPieChartMain = null;
-        let myParetoChart = null;
-        let mySpendingQuantityChart = null;
-        let mySpendingEvolutionChart = null;
-        let mySpendingRankingChart = null;
-        const defaultChartColors = ['#4c51bf', '#f97316', '#10b981', '#ef4444', '#3b82f6', '#eab308', '#9ca3af'];
-        const chartColors = {};
+        let unsubscribeExpenses = null;
+        let unsubscribeCategories = null;
+        let activeCharts = {};
+        let allExpenses = []; // Array para guardar os gastos localmente
 
-        function loadDataFromLocalStorage() {
-            const storedTransactions = JSON.parse(localStorage.getItem('transactions')) || [];
-            allTransactions = storedTransactions.map(t => ({ ...t, timestamp: new Date(t.timestamp) }));
-            allTransactions.sort((a, b) => b.timestamp - a.timestamp); 
+        // --- LÓGICA DA BARRA LATERAL (SIDEBAR) ---
+        const collapseIcon = `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>`;
+        const expandIcon = `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg>`;
 
-            categoryBudgets = JSON.parse(localStorage.getItem('categoryBudgets')) || {};
-            customOptions = JSON.parse(localStorage.getItem('customOptions')) || {
-                categories: ["Alimentação", "Transporte", "Moradia", "Lazer", "Saúde", "Educação", "Outros"],
-                paymentMethods: ["Crédito", "Débito", "Pix", "VA", "Dinheiro"]
+        function setSidebarState(isCollapsed) {
+            if (isCollapsed) {
+                sidebar.classList.remove('w-64');
+                sidebar.classList.add('w-20');
+                sidebarTitle.classList.add('opacity-0', 'invisible');
+                sidebarTexts.forEach(text => text.classList.add('hidden'));
+                navLinks.forEach(link => {
+                    link.classList.add('justify-center');
+                    link.querySelector('.mr-3').classList.add('mr-0');
+                });
+                logoutBtn.classList.add('justify-center');
+                logoutBtn.querySelector('.mr-3').classList.add('mr-0');
+
+                sidebarToggleBtn.innerHTML = expandIcon;
+                sidebarToggleBtn.title = "Expandir barra lateral";
+            } else {
+                sidebar.classList.add('w-64');
+                sidebar.classList.remove('w-20');
+                sidebarTitle.classList.remove('opacity-0', 'invisible');
+                sidebarTexts.forEach(text => text.classList.remove('hidden'));
+                navLinks.forEach(link => {
+                    link.classList.remove('justify-center');
+                    link.querySelector('svg').classList.remove('mr-0');
+                });
+                logoutBtn.classList.remove('justify-center');
+                logoutBtn.querySelector('svg').classList.remove('mr-0');
+                
+                sidebarToggleBtn.innerHTML = collapseIcon;
+                sidebarToggleBtn.title = "Minimizar barra lateral";
+            }
+        }
+
+        function toggleSidebar() {
+            const isCollapsed = sidebar.classList.contains('w-20');
+            setSidebarState(!isCollapsed);
+            localStorage.setItem('sidebarCollapsed', !isCollapsed);
+        }
+
+        function initializeSidebar() {
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            setSidebarState(isCollapsed);
+        }
+
+        if (sidebarToggleBtn) {
+            sidebarToggleBtn.addEventListener('click', toggleSidebar);
+        }
+        
+        // --- LÓGICA DE TEMA (DARK/LIGHT MODE) ---
+        const sunIconOnly = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
+        const moonIconOnly = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>`;
+
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeToggleButton.innerHTML = sunIconOnly;
+                loginThemeToggleButton.innerHTML = sunIconOnly;
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggleButton.innerHTML = moonIconOnly;
+                loginThemeToggleButton.innerHTML = moonIconOnly;
+            }
+            localStorage.setItem('theme', theme);
+            if (auth.currentUser && typeof applyFiltersAndRender === 'function') {
+                applyFiltersAndRender();
+            }
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const newTheme = isDark ? 'light' : 'dark';
+            applyTheme(newTheme);
+        }
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const osPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(savedTheme || (osPrefersDark ? 'dark' : 'light'));
+        }
+
+        if (themeToggleButton) themeToggleButton.addEventListener('click', toggleTheme);
+        if (loginThemeToggleButton) loginThemeToggleButton.addEventListener('click', toggleTheme);
+        
+        // --- INICIALIZAÇÃO GERAL ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeTheme();
+            initializeSidebar();
+        });
+
+
+        // --- LÓGICA DE AUTENTICAÇÃO ---
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loginSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                userInfo.textContent = user.email;
+                await setupInitialData(user.uid);
+                startAppListeners(user.uid);
+            } else {
+                appSection.classList.add('hidden');
+                loginSection.classList.remove('hidden');
+                userInfo.textContent = '';
+                stopAppListeners();
+            }
+        });
+
+        // --- CONFIGURAÇÃO INICIAL DE DADOS ---
+        async function setupInitialData(uid) {
+            const categoriesQuery = query(collection(db, "categories"), where("uid", "==", uid));
+            const querySnapshot = await getDocs(categoriesQuery);
+
+            if (querySnapshot.empty) {
+                const defaultCategories = [
+                    'Alimentação', 'Educação', 'Farmácia', 'Lazer', 'Lojas', 
+                    'Mercado', 'Moradia', 'Outros', 'Saúde', 'Transporte'
+                ];
+                
+                const categoryPromises = defaultCategories.map(catName => {
+                    return addDoc(collection(db, "categories"), { name: catName, uid: uid });
+                });
+                
+                await Promise.all(categoryPromises);
+            }
+        }
+
+        // --- INICIALIZAÇÃO E PARAGEM DOS LISTENERS ---
+        function startAppListeners(uid) {
+            const categoriesQuery = query(collection(db, "categories"), where("uid", "==", uid));
+            unsubscribeCategories = onSnapshot(categoriesQuery, (snapshot) => {
+                const categories = [];
+                snapshot.forEach(doc => categories.push({ id: doc.id, ...doc.data() }));
+                updateCategoryUI(categories);
+            });
+
+            const expensesQuery = query(collection(db, "expenses"), where("uid", "==", uid));
+            unsubscribeExpenses = onSnapshot(expensesQuery, (snapshot) => {
+                const expenses = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.date && typeof data.date.toDate === 'function') {
+                        expenses.push({ id: doc.id, ...data, date: data.date.toDate() });
+                    }
+                });
+                
+                expenses.sort((a, b) => b.date - a.date);
+                allExpenses = expenses;
+                updateDashboardMonthFilter(allExpenses);
+                applyFiltersAndRender();
+            });
+        }
+
+        function stopAppListeners() {
+            if (unsubscribeExpenses) unsubscribeExpenses();
+            if (unsubscribeCategories) unsubscribeCategories();
+        }
+
+        // --- LÓGICA DE FILTROS ---
+        function applyFiltersAndRender() {
+            const descriptionFilter = filterDescription.value.toLowerCase().trim();
+            const categoryFilter = filterCategorySelect.value;
+            const paymentFilter = filterPaymentSelect.value;
+
+            let filteredExpenses = allExpenses;
+
+            if (descriptionFilter) {
+                filteredExpenses = filteredExpenses.filter(exp => exp.description.toLowerCase().includes(descriptionFilter));
+            }
+            if (categoryFilter !== 'all') {
+                filteredExpenses = filteredExpenses.filter(exp => exp.category === categoryFilter);
+            }
+            if (paymentFilter !== 'all') {
+                filteredExpenses = filteredExpenses.filter(exp => exp.paymentMethod === paymentFilter);
+            }
+            
+            updateDashboardSummaries(allExpenses); // Summaries should reflect all data, not filtered
+            updateExpensesTable(filteredExpenses);
+
+            // Filtros da página de Dashboard
+            const monthFilter = dashboardMonthFilter.value;
+            let dashboardExpenses = allExpenses;
+
+            if (monthFilter !== 'all') {
+                const [year, month] = monthFilter.split('-').map(Number);
+                 dashboardExpenses = dashboardExpenses.filter(exp => {
+                    return exp.date.getFullYear() === year && exp.date.getMonth() === month - 1;
+                });
+            }
+            
+            // Atualiza UI da página de Dashboard
+            updateAllCharts(dashboardExpenses, filteredExpenses); // Pass both total and filtered for different charts
+        }
+
+        filterDescription.addEventListener('input', applyFiltersAndRender);
+        filterCategorySelect.addEventListener('change', applyFiltersAndRender);
+        filterPaymentSelect.addEventListener('change', applyFiltersAndRender);
+        dashboardMonthFilter.addEventListener('change', applyFiltersAndRender);
+
+        document.getElementById('clear-filters-btn').addEventListener('click', () => {
+            filterDescription.value = '';
+            filterCategorySelect.value = 'all';
+            filterPaymentSelect.value = 'all';
+            applyFiltersAndRender();
+        });
+
+        function updateDashboardMonthFilter(expenses) {
+            const monthSet = new Set();
+            expenses.forEach(exp => {
+                const year = exp.date.getFullYear();
+                const month = exp.date.getMonth() + 1;
+                monthSet.add(`${year}-${String(month).padStart(2, '0')}`);
+            });
+
+            const sortedMonths = Array.from(monthSet).sort().reverse();
+
+            dashboardMonthFilter.innerHTML = '<option value="all">Ano Inteiro</option>';
+            sortedMonths.forEach(monthStr => {
+                const [year, month] = monthStr.split('-');
+                const date = new Date(year, month - 1, 1);
+                const optionText = date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
+                
+                const option = document.createElement('option');
+                option.value = `${year}-${month}`;
+                option.textContent = optionText.charAt(0).toUpperCase() + optionText.slice(1);
+                dashboardMonthFilter.appendChild(option);
+            });
+        }
+
+
+        // --- LÓGICA DE GASTOS ---
+        expenseForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('expenseId').value;
+            const expenseData = {
+                description: document.getElementById('expenseDescription').value,
+                detail: document.getElementById('expenseDetail').value,
+                date: new Date(document.getElementById('expenseDate').value),
+                value: parseFloat(document.getElementById('expenseValue').value),
+                paymentMethod: document.getElementById('expensePayment').value,
+                category: document.getElementById('expenseCategory').value,
+                uid: auth.currentUser.uid
             };
-        }
 
-        function saveDataToLocalStorage() {
-            localStorage.setItem('transactions', JSON.stringify(allTransactions));
-            localStorage.setItem('categoryBudgets', JSON.stringify(categoryBudgets));
-            localStorage.setItem('customOptions', JSON.stringify(customOptions));
-        }
-
-        function renderAll() {
-            renderDynamicOptions();
-            applyFilterAndRender();
-        }
-
-        // Adiciona event listeners para a navegação
-        showMainButton.addEventListener('click', () => {
-            mainView.classList.remove('hidden');
-            dashboardView.classList.add('hidden');
-            settingsView.classList.add('hidden');
-            showMainButton.classList.add('bg-indigo-600', 'text-white');
-            showDashboardButton.classList.remove('bg-indigo-600', 'text-white');
-            showDashboardButton.classList.add('bg-gray-200', 'text-gray-800');
-            showSettingsButton.classList.remove('bg-indigo-600', 'text-white');
-            showSettingsButton.classList.add('bg-gray-200', 'text-gray-800');
-        });
-
-        showDashboardButton.addEventListener('click', () => {
-            mainView.classList.add('hidden');
-            dashboardView.classList.remove('hidden');
-            settingsView.classList.add('hidden');
-            showDashboardButton.classList.add('bg-indigo-600', 'text-white');
-            showMainButton.classList.remove('bg-indigo-600', 'text-white');
-            showMainButton.classList.add('bg-gray-200', 'text-gray-800');
-            showSettingsButton.classList.remove('bg-indigo-600', 'text-white');
-            showSettingsButton.classList.add('bg-gray-200', 'text-gray-800');
-            applyDashboardFilterAndRender();
-        });
-
-        showSettingsButton.addEventListener('click', () => {
-            mainView.classList.add('hidden');
-            dashboardView.classList.add('hidden');
-            settingsView.classList.remove('hidden');
-            showSettingsButton.classList.add('bg-indigo-600', 'text-white');
-            showMainButton.classList.remove('bg-indigo-600', 'text-white');
-            showMainButton.classList.add('bg-gray-200', 'text-gray-800');
-            showDashboardButton.classList.remove('bg-indigo-600', 'text-white');
-            showDashboardButton.classList.add('bg-gray-200', 'text-gray-800');
-        });
-        
-        function renderDynamicOptions() {
-            const sortedCategories = [...customOptions.categories].sort();
-            const sortedPaymentMethods = [...customOptions.paymentMethods].sort();
-            
-            renderSelectOptions(categoryInput, sortedCategories, 'Selecione a categoria');
-            renderSelectOptions(budgetCategorySelect, sortedCategories, 'Selecione a categoria');
-            renderSelectOptions(paymentMethodInput, sortedPaymentMethods, 'Selecione a forma de pagamento');
-            renderOptionList(categoryListManager, sortedCategories, 'removeCategory');
-            renderOptionList(paymentListManager, sortedPaymentMethods, 'removePaymentMethod');
-        }
-
-        function renderSelectOptions(selectElement, options, placeholder) {
-            selectElement.innerHTML = `<option value="">${placeholder}</option>`;
-            options.forEach(option => {
-                const optionElement = document.createElement('option');
-                optionElement.value = option;
-                optionElement.textContent = option;
-                selectElement.appendChild(optionElement);
-            });
-        }
-
-        function renderOptionList(listElement, options, removeFunctionName) {
-            listElement.innerHTML = '';
-            options.forEach(option => {
-                const listItem = document.createElement('li');
-                listItem.className = 'flex justify-between items-center bg-white p-2 rounded-lg shadow-sm';
-                listItem.innerHTML = `
-                    <span class="font-medium text-gray-800">${option}</span>
-                    <button class="text-xs text-red-500 hover:underline" onclick="${removeFunctionName}('${option}')">Remover</button>
-                `;
-                listElement.appendChild(listItem);
-            });
-        }
-
-        window.removeCategory = (category) => {
-            customOptions.categories = customOptions.categories.filter(c => c !== category);
-            saveDataToLocalStorage();
-            renderAll();
-        };
-
-        window.removePaymentMethod = (paymentMethod) => {
-            customOptions.paymentMethods = customOptions.paymentMethods.filter(p => p !== paymentMethod);
-            saveDataToLocalStorage();
-            renderAll();
-        };
-
-        function applyFilterAndRender() {
-            let filteredTransactions = [];
-            const now = new Date();
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-            
-            switch (currentFilter) {
-                case 'day':
-                    filteredTransactions = allTransactions.filter(t => t.timestamp.toDateString() === today.toDateString());
-                    break;
-                case 'yesterday':
-                    filteredTransactions = allTransactions.filter(t => t.timestamp.toDateString() === yesterday.toDateString());
-                    break;
-                case 'week':
-                    const oneWeekAgo = new Date(now);
-                    oneWeekAgo.setDate(now.getDate() - 7);
-                    filteredTransactions = allTransactions.filter(t => t.timestamp >= oneWeekAgo);
-                    break;
-                case 'month':
-                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startOfMonth);
-                    break;
-                case 'date-range':
-                    const startDate = new Date(startDateInput.value);
-                    const endDate = new Date(endDateInput.value);
-                    if (startDate.toString() === 'Invalid Date' || endDate.toString() === 'Invalid Date' || startDate > endDate) {
-                        showModal('Por favor, insira um intervalo de datas válido.');
-                        currentFilter = 'all';
-                        resetActiveFilters();
-                        return;
-                    }
-                    endDate.setHours(23, 59, 59, 999); 
-                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startDate && t.timestamp <= endDate);
-                    break;
-                case 'all':
-                default:
-                    filteredTransactions = allTransactions;
-                    break;
-            }
-            
-            const total = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
-            renderTransactions(filteredTransactions, total);
-            renderPieChart(filteredTransactions);
-            renderCategoryBudgets();
-            renderSpendingVariation(allTransactions);
-        }
-
-        function renderSpendingVariation(transactions) {
-            const today = new Date();
-            const yesterday = new Date(today);
-            yesterday.setDate(today.getDate() - 1);
-
-            const spentToday = transactions
-                .filter(t => t.timestamp.toDateString() === today.toDateString())
-                .reduce((sum, transaction) => sum + transaction.amount, 0);
-            
-            const spentYesterday = transactions
-                .filter(t => t.timestamp.toDateString() === yesterday.toDateString())
-                .reduce((sum, transaction) => sum + transaction.amount, 0);
-
-            spendingVariationIndicator.innerHTML = '';
-
-            if (spentYesterday === 0 && spentToday > 0) {
-                spendingVariationIndicator.className = 'mt-2 text-sm font-semibold flex items-center justify-center space-x-2 text-green-600';
-                spendingVariationIndicator.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                    </svg>
-                    <span>+100% (gasto novo)</span>
-                `;
-            } else if (spentYesterday > 0 && spentToday === 0) {
-                spendingVariationIndicator.className = 'mt-2 text-sm font-semibold flex items-center justify-center space-x-2 text-red-600';
-                spendingVariationIndicator.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                    </svg>
-                    <span>-100% (sem gastos hoje)</span>
-                `;
-            } else if (spentYesterday > 0) {
-                const percentageChange = ((spentToday - spentYesterday) / spentYesterday) * 100;
-                let colorClass = 'text-gray-500';
-                let icon = '';
-
-                if (percentageChange > 0) {
-                    colorClass = 'text-red-600';
-                    icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                            </svg>`;
-                } else if (percentageChange < 0) {
-                    colorClass = 'text-green-600';
-                    icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                            </svg>`;
+            try {
+                if (id) {
+                    await updateDoc(doc(db, "expenses", id), expenseData);
                 } else {
-                    colorClass = 'text-gray-500';
-                    icon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                            </svg>`;
+                    await addDoc(collection(db, "expenses"), expenseData);
                 }
-                
-                spendingVariationIndicator.className = `mt-2 text-sm font-semibold flex items-center justify-center space-x-2 ${colorClass}`;
-                spendingVariationIndicator.innerHTML = `
-                    ${icon}
-                    <span>${percentageChange.toFixed(1).replace('.', ',')}% de hoje vs ontem</span>
-                `;
-            } else {
-                spendingVariationIndicator.className = 'mt-2 text-sm font-semibold flex items-center justify-center space-x-2 text-gray-500';
-                spendingVariationIndicator.textContent = 'Não há dados para comparar hoje e ontem.';
+                resetExpenseForm();
+            } catch (error) {
+                console.error("Erro ao salvar gasto:", error);
+                alert("Ocorreu um erro ao salvar o gasto.");
             }
-        }
-
-        function renderTransactions(transactions, total) {
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const textColorClass = isDarkMode ? 'text-gray-100' : 'text-gray-800';
-            const textMutedColorClass = isDarkMode ? 'text-gray-400' : 'text-gray-500';
-            const bgColorClass = isDarkMode ? 'bg-gray-700' : 'bg-white';
-
-            transactionList.innerHTML = '';
-
-            if (transactions.length === 0) {
-                loadingMessage.textContent = 'Nenhum gasto encontrado para este período.';
-                loadingMessage.style.display = 'block';
-            } else {
-                loadingMessage.style.display = 'none';
-                transactions.forEach(transaction => {
-                    const listItem = document.createElement('li');
-                    listItem.className = `flex justify-between items-center p-3 rounded-lg shadow-sm ${bgColorClass}`;
-                    
-                    const mainInfo = document.createElement('div');
-                    mainInfo.className = 'flex flex-col';
-                    
-                    const descriptionSpan = document.createElement('span');
-                    descriptionSpan.textContent = transaction.description;
-                    descriptionSpan.className = `font-medium ${textColorClass}`;
-                    
-                    const detailSpan = document.createElement('span');
-                    detailSpan.textContent = transaction.detail ? `Detalhe: ${transaction.detail}` : '';
-                    detailSpan.className = `text-xs ${textMutedColorClass}`;
-
-                    const dateTimeSpan = document.createElement('span');
-                    dateTimeSpan.textContent = transaction.timestamp.toLocaleString('pt-BR');
-                    dateTimeSpan.className = `text-xs ${textMutedColorClass}`;
-
-                    const paymentCategorySpan = document.createElement('span');
-                    paymentCategorySpan.textContent = `(${transaction.paymentMethod} - ${transaction.category})`;
-                    paymentCategorySpan.className = `text-xs ${textMutedColorClass}`;
-
-                    mainInfo.appendChild(descriptionSpan);
-                    if (transaction.detail) {
-                        mainInfo.appendChild(detailSpan);
-                    }
-                    mainInfo.appendChild(dateTimeSpan);
-                    mainInfo.appendChild(paymentCategorySpan);
-
-                    const rightSide = document.createElement('div');
-                    rightSide.className = 'flex items-center space-x-4';
-                    
-                    const amountSpan = document.createElement('span');
-                    amountSpan.textContent = `R$ ${transaction.amount.toFixed(2).replace('.', ',')}`;
-                    amountSpan.className = 'font-bold text-red-500';
-                    
-                    const editButton = document.createElement('button');
-                    editButton.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-blue-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.794.793-2.828-2.828.794-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                        </svg>`;
-                    editButton.onclick = () => loadTransactionForEdit(transaction.id);
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.innerHTML = `
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 hover:text-red-500 transition-colors" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm6 0a1 1 0 112 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
-                        </svg>`;
-                    deleteButton.onclick = () => deleteTransaction(transaction.id);
-
-                    rightSide.appendChild(amountSpan);
-                    rightSide.appendChild(editButton);
-                    rightSide.appendChild(deleteButton);
-                    
-                    listItem.appendChild(mainInfo);
-                    listItem.appendChild(rightSide);
-                    transactionList.appendChild(listItem);
-                });
-            }
-
-            totalAmountElement.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
-        }
-        
-        function renderPieChart(transactions) {
-            const spendingByCategory = transactions.reduce((acc, transaction) => {
-                acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
-                return acc;
-            }, {});
-
-            const labels = Object.keys(spendingByCategory);
-            const data = Object.values(spendingByCategory);
-            const backgroundColors = labels.map((label, index) => chartColors[label] || defaultChartColors[index % defaultChartColors.length] || '#9ca3af');
-
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const legendColor = isDarkMode ? '#f3f4f6' : '#1f2937';
-
-            if (myPieChartMain) {
-                myPieChartMain.data.labels = labels;
-                myPieChartMain.data.datasets[0].data = data;
-                myPieChartMain.data.datasets[0].backgroundColor = backgroundColors;
-                myPieChartMain.options.plugins.legend.labels.color = legendColor;
-                myPieChartMain.update();
-            } else {
-                myPieChartMain = new Chart(pieChartCanvasMain, {
-                    type: 'pie',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: backgroundColors,
-                            hoverOffset: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { 
-                                position: 'top',
-                                labels: {
-                                    color: legendColor
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => {
-                                        const label = context.label || '';
-                                        const value = context.parsed || 0;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return `${label}: R$ ${value.toFixed(2).replace('.', ',')} (${percentage}%)`;
-                                    }
-                                }
-                            },
-                            datalabels: {
-                                color: '#fff',
-                                formatter: (value, context) => {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
-                                    const formattedValue = `R$ ${value.toFixed(2).replace('.', ',')}`;
-                                    if (percentage > 5) {
-                                        return `${formattedValue}\n(${percentage}%)`;
-                                    } else {
-                                        return '';
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                });
-            }
-        }
-        
-        function renderCategoryBudgets() {
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const textColorClass = isDarkMode ? 'text-gray-100' : 'text-gray-800';
-            const textMutedColorClass = isDarkMode ? 'text-gray-400' : 'text-gray-600';
-            const bgColorClass = isDarkMode ? 'bg-gray-700' : 'bg-white';
-            const overBudgetBgClass = isDarkMode ? 'bg-red-800' : 'bg-red-100';
-
-            categoryBudgetList.innerHTML = '';
-            
-            const now = new Date();
-            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-            const monthlySpentByCategory = allTransactions
-                .filter(t => t.timestamp >= startOfMonth)
-                .reduce((acc, t) => {
-                    acc[t.category] = (acc[t.category] || 0) + t.amount;
-                    return acc;
-                }, {});
-
-            for (const category in categoryBudgets) {
-                const budgetAmount = categoryBudgets[category];
-                const spentAmount = monthlySpentByCategory[category] || 0;
-                const remaining = budgetAmount - spentAmount;
-                const percentage = budgetAmount > 0 ? (spentAmount / budgetAmount) * 100 : 0;
-                const isOverBudget = percentage > 100;
-
-                const listItem = document.createElement('div');
-                listItem.className = `p-3 rounded-lg shadow-sm ${isOverBudget ? overBudgetBgClass : bgColorClass}`;
-                
-                const header = document.createElement('div');
-                header.className = 'flex justify-between items-center mb-1';
-                header.innerHTML = `
-                    <h3 class="font-bold ${textColorClass}">${category}</h3>
-                    <button class="text-xs text-red-500 hover:underline" onclick="deleteCategoryBudget('${category}')">Remover</button>
-                `;
-
-                const amounts = document.createElement('div');
-                amounts.className = 'flex justify-between items-center text-sm';
-                amounts.innerHTML = `
-                    <p class="${textMutedColorClass}">Orçamento: <span class="font-semibold">R$ ${budgetAmount.toFixed(2).replace('.', ',')}</span></p>
-                    <p class="${isOverBudget ? 'text-red-500' : textMutedColorClass}">Restante: <span class="font-semibold">R$ ${remaining.toFixed(2).replace('.', ',')}</span></p>
-                `;
-
-                const progressBarContainer = document.createElement('div');
-                progressBarContainer.className = 'w-full bg-gray-200 rounded-full h-2.5 mt-2';
-                const progressBar = document.createElement('div');
-                progressBar.className = `budget-progress-bar h-2.5 rounded-full ${isOverBudget ? 'bg-red-500' : 'bg-indigo-600'}`;
-                progressBar.style.width = `${Math.min(percentage, 100)}%`;
-                progressBarContainer.appendChild(progressBar);
-
-                listItem.appendChild(header);
-                listItem.appendChild(amounts);
-                listItem.appendChild(progressBarContainer);
-                categoryBudgetList.appendChild(listItem);
-            }
-        }
-        
-        // Função central para filtrar os dados do dashboard
-        function applyDashboardFilterAndRender() {
-            let filteredTransactions = [];
-            const now = new Date();
-            
-            switch (currentDashboardFilter) {
-                case 'month':
-                    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startOfMonth);
-                    break;
-                case 'week':
-                    const startOfWeek = new Date(now);
-                    startOfWeek.setDate(now.getDate() - 7);
-                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startOfWeek);
-                    break;
-                case 'date-range':
-                    const startDate = new Date(dashboardStartDateInput.value);
-                    const endDate = new Date(dashboardEndDateInput.value);
-                    if (startDate.toString() === 'Invalid Date' || endDate.toString() === 'Invalid Date' || startDate > endDate) {
-                        showModal('Por favor, insira um intervalo de datas válido.');
-                        currentDashboardFilter = 'month';
-                        resetDashboardActiveFilters();
-                        return;
-                    }
-                    endDate.setHours(23, 59, 59, 999);
-                    filteredTransactions = allTransactions.filter(t => t.timestamp >= startDate && t.timestamp <= endDate);
-                    break;
-                default:
-                    filteredTransactions = allTransactions;
-                    break;
-            }
-            renderDashboardCharts(filteredTransactions);
-        }
-
-        function renderDashboardCharts(transactions) {
-            renderParetoChart(transactions);
-            renderSpendingRankingChart(transactions); 
-            renderSpendingQuantityChart(transactions);
-            renderSpendingEvolutionChart(transactions, 'month');
-        }
-
-        function renderParetoChart(transactions) {
-            const spendingByCategory = transactions.reduce((acc, transaction) => {
-                acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
-                return acc;
-            }, {});
-
-            const sortedCategories = Object.keys(spendingByCategory).sort((a, b) => spendingByCategory[b] - spendingByCategory[a]);
-            const sortedSpending = sortedCategories.map(category => spendingByCategory[category]);
-            
-            const total = sortedSpending.reduce((sum, amount) => sum + amount, 0);
-            let cumulativePercentage = 0;
-            const cumulativeData = sortedSpending.map(amount => {
-                cumulativePercentage += (amount / total) * 100;
-                return cumulativePercentage;
-            });
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const axisColor = isDarkMode ? '#d1d5db' : '#1f2937';
-            const gridColor = isDarkMode ? '#4b5563' : '#e5e7eb';
-            const fontColor = isDarkMode ? '#d1d5db' : '#1f2937';
-
-            if (myParetoChart) {
-                myParetoChart.data.labels = sortedCategories;
-                myParetoChart.data.datasets[0].data = sortedSpending;
-                myParetoChart.data.datasets[1].data = cumulativeData;
-                myParetoChart.options.scales.y.ticks.color = axisColor;
-                myParetoChart.options.scales.y1.ticks.color = axisColor;
-                myParetoChart.options.scales.x.ticks.color = axisColor;
-                myParetoChart.options.scales.y.grid.color = gridColor;
-                myParetoChart.options.scales.x.grid.color = gridColor;
-                myParetoChart.options.plugins.legend.labels.color = fontColor;
-                myParetoChart.options.plugins.datalabels.color = fontColor;
-                myParetoChart.update();
-            } else {
-                myParetoChart = new Chart(document.getElementById('pareto-chart').getContext('2d'), {
-                    type: 'bar',
-                    data: {
-                        labels: sortedCategories,
-                        datasets: [{
-                            label: 'Gastos por Categoria',
-                            data: sortedSpending,
-                            backgroundColor: '#4c51bf',
-                            yAxisID: 'y',
-                        }, {
-                            label: 'Percentual Acumulado',
-                            data: cumulativeData,
-                            backgroundColor: '#10b981',
-                            borderColor: '#10b981',
-                            type: 'line',
-                            fill: false,
-                            yAxisID: 'y1',
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                        scales: {
-                            y: {
-                                type: 'linear',
-                                display: true,
-                                position: 'left',
-                                beginAtZero: true,
-                                title: { display: true, text: 'Valor (R$)', color: axisColor },
-                                ticks: { color: axisColor },
-                                grid: { color: gridColor }
-                            },
-                            y1: {
-                                type: 'linear',
-                                display: true,
-                                position: 'right',
-                                min: 0,
-                                max: 100,
-                                title: { display: true, text: 'Percentual (%)', color: axisColor },
-                                grid: { drawOnChartArea: false },
-                                ticks: { color: axisColor }
-                            },
-                            x: {
-                                ticks: { color: axisColor },
-                                grid: { color: gridColor }
-                            }
-                        },
-                        plugins: {
-                            legend: { 
-                                labels: { color: fontColor }
-                            },
-                            datalabels: {
-                                anchor: 'end',
-                                align: 'top',
-                                formatter: (value, context) => {
-                                    if (context.datasetIndex === 0) {
-                                        return `R$ ${value.toFixed(2).replace('.', ',')}`;
-                                    } else {
-                                        return `${value.toFixed(1)}%`;
-                                    }
-                                },
-                                color: fontColor
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                });
-            }
-        }
-        
-        function renderSpendingQuantityChart(transactions) {
-            // Calcula o valor total gasto por categoria, não a quantidade
-            const spendingByCategory = transactions.reduce((acc, transaction) => {
-                acc[transaction.category] = (acc[transaction.category] || 0) + transaction.amount;
-                return acc;
-            }, {});
-
-            const labels = Object.keys(spendingByCategory);
-            const data = Object.values(spendingByCategory);
-            const backgroundColors = labels.map((label, index) => chartColors[label] || defaultChartColors[index % defaultChartColors.length] || '#9ca3af');
-
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const legendColor = isDarkMode ? '#f3f4f6' : '#1f2937';
-
-            if (mySpendingQuantityChart) {
-                mySpendingQuantityChart.data.labels = labels;
-                mySpendingQuantityChart.data.datasets[0].data = data;
-                mySpendingQuantityChart.data.datasets[0].backgroundColor = backgroundColors;
-                mySpendingQuantityChart.options.plugins.legend.labels.color = legendColor;
-                mySpendingQuantityChart.update();
-            } else {
-                mySpendingQuantityChart = new Chart(document.getElementById('spending-quantity-chart').getContext('2d'), {
-                    type: 'pie',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            data: data,
-                            backgroundColor: backgroundColors,
-                            hoverOffset: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { 
-                                position: 'top',
-                                labels: {
-                                    color: legendColor
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => {
-                                        const label = context.label || '';
-                                        const value = context.parsed || 0;
-                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return `${label}: R$ ${value.toFixed(2).replace('.', ',')} (${percentage}%)`;
-                                    }
-                                }
-                            },
-                             datalabels: {
-                                color: '#fff',
-                                formatter: (value, context) => {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
-                                    const formattedValue = `R$ ${value.toFixed(2).replace('.', ',')}`;
-                                    if (percentage > 5) {
-                                        return `${formattedValue}\n(${percentage}%)`;
-                                    } else {
-                                        return '';
-                                    }
-                                },
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                });
-            }
-        }
-        
-        function renderSpendingRankingChart(transactions) {
-            const spendingByDescription = transactions.reduce((acc, transaction) => {
-                const key = transaction.description;
-                acc[key] = (acc[key] || 0) + transaction.amount;
-                return acc;
-            }, {});
-
-            // Converte para um array, ordena e pega os 10 primeiros
-            const sortedDescriptions = Object.entries(spendingByDescription)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 10);
-
-            const labels = sortedDescriptions.map(([description]) => description);
-            const data = sortedDescriptions.map(([, amount]) => amount);
-            const total = data.reduce((sum, amount) => sum + amount, 0);
-
-            const ctx = document.getElementById('spending-ranking-chart').getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, '#10b981');
-            gradient.addColorStop(1, '#6ee7b7');
-            
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const axisColor = isDarkMode ? '#d1d5db' : '#1f2937';
-
-            if (mySpendingRankingChart) {
-                mySpendingRankingChart.data.labels = labels;
-                mySpendingRankingChart.data.datasets[0].data = data;
-                mySpendingRankingChart.data.datasets[0].backgroundColor = gradient;
-                mySpendingRankingChart.options.scales.x.ticks.color = axisColor;
-                mySpendingRankingChart.options.scales.y.ticks.color = axisColor;
-                mySpendingRankingChart.options.plugins.datalabels.color = axisColor;
-                mySpendingRankingChart.update();
-            } else {
-                mySpendingRankingChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Valor Total',
-                            data: data,
-                            backgroundColor: gradient,
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        indexAxis: 'y', // Define o eixo Y para ser o eixo das categorias
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                title: { display: false },
-                                ticks: { color: axisColor }
-                            },
-                            x: {
-                                beginAtZero: true,
-                                title: { display: true, text: 'Valor (R$)', color: axisColor },
-                                ticks: { color: axisColor }
-                            }
-                        },
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: (context) => {
-                                        const value = context.parsed.x; // Pega o valor do eixo X
-                                        const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                        return `Valor: R$ ${value.toFixed(2).replace('.', ',')} (${percentage}%)`;
-                                    }
-                                }
-                            },
-                            datalabels: {
-                                anchor: 'end',
-                                align: 'right', // Alinha o rótulo à direita da barra
-                                offset: 10,
-                                formatter: (value) => {
-                                    const percentage = total > 0 ? ((value / total) * 100).toFixed(0) : 0;
-                                    const formattedValue = `R$ ${value.toFixed(2).replace('.', ',')}`;
-                                    return `${formattedValue} (${percentage}%)`;
-                                },
-                                color: axisColor
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                });
-            }
-        }
-
-
-        function renderSpendingEvolutionChart(transactions, filter = 'month') {
-            const dataByPeriod = {};
-            
-            transactions.forEach(t => {
-                let key;
-                if (filter === 'day') {
-                    key = t.timestamp.toLocaleDateString('pt-BR');
-                } else if (filter === 'week') {
-                    const firstDayOfWeek = new Date(t.timestamp);
-                    const dayOfWeek = firstDayOfWeek.getDay(); // 0 = domingo, 1 = segunda...
-                    const diff = firstDayOfWeek.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Ajusta para segunda-feira
-                    firstDayOfWeek.setDate(diff);
-                    const lastDayOfWeek = new Date(firstDayOfWeek);
-                    lastDayOfWeek.setDate(lastDayOfWeek.getDate() + 6);
-                    key = `${firstDayOfWeek.toLocaleDateString('pt-BR')} - ${lastDayOfWeek.toLocaleDateString('pt-BR')}`;
-                } else {
-                    key = t.timestamp.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
-                }
-                dataByPeriod[key] = (dataByPeriod[key] || 0) + t.amount;
-            });
-
-            const sortedKeys = Object.keys(dataByPeriod).sort((a, b) => {
-                const parseDate = (dateStr) => {
-                    const parts = dateStr.includes('/') ? dateStr.split(' ')[0].split('/') : null;
-                    if (parts && parts.length === 3) {
-                        return new Date(parts[2], parts[1] - 1, parts[0]);
-                    }
-                    const monthMap = { 'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3, 'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7, 'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11 };
-                    const [month, year] = dateStr.split(' de ');
-                    if (month && year) {
-                        return new Date(year, monthMap[month.toLowerCase()], 1);
-                    }
-                    return new Date(a);
-                };
-                const dateA = parseDate(a);
-                const dateB = parseDate(b);
-                return dateA - dateB;
-            });
-            const sortedData = sortedKeys.map(key => dataByPeriod[key]);
-            
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const axisColor = isDarkMode ? '#d1d5db' : '#1f2937';
-            const gridColor = isDarkMode ? '#4b5563' : '#e5e7eb';
-            const fontColor = isDarkMode ? '#d1d5db' : '#1f2937';
-
-            if (mySpendingEvolutionChart) {
-                mySpendingEvolutionChart.data.labels = sortedKeys;
-                mySpendingEvolutionChart.data.datasets[0].data = sortedData;
-                mySpendingEvolutionChart.options.scales.x.ticks.color = axisColor;
-                mySpendingEvolutionChart.options.scales.y.ticks.color = axisColor;
-                mySpendingEvolutionChart.options.scales.y.grid.color = gridColor;
-                mySpendingEvolutionChart.options.scales.x.grid.color = gridColor;
-                mySpendingEvolutionChart.options.plugins.legend.labels.color = fontColor;
-                mySpendingEvolutionChart.options.plugins.datalabels.color = fontColor;
-                mySpendingEvolutionChart.update();
-            } else {
-                mySpendingEvolutionChart = new Chart(document.getElementById('spending-evolution-chart').getContext('2d'), {
-                    type: 'line',
-                    data: {
-                        labels: sortedKeys,
-                        datasets: [{
-                            label: 'Total de Gastos (R$)',
-                            data: sortedData,
-                            backgroundColor: '#4c51bf',
-                            borderColor: '#3c366b',
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: { beginAtZero: true, title: { display: true, text: 'Valor (R$)', color: axisColor }, ticks: { color: axisColor }, grid: { color: gridColor } },
-                            x: { title: { display: true, text: filter === 'day' ? 'Dia' : 'Mês', color: axisColor }, ticks: { color: axisColor }, grid: { color: gridColor } }
-                        },
-                        plugins: {
-                            legend: { labels: { color: fontColor } },
-                             datalabels: {
-                                color: fontColor,
-                                align: 'top',
-                                display: (context) => context.dataset.data.length <= 15,
-                                formatter: (value) => `R$ ${value.toFixed(2).replace('.', ',')}`
-                            }
-                        }
-                    },
-                    plugins: [ChartDataLabels]
-                });
-            }
-        }
-
-        evolutionFilterDayBtn.addEventListener('click', () => {
-            evolutionFilterDayBtn.classList.add('bg-indigo-700', 'text-white');
-            evolutionFilterMonthBtn.classList.remove('bg-indigo-700', 'text-white');
-            evolutionFilterDayBtn.classList.remove('bg-indigo-50', 'text-indigo-700');
-            evolutionFilterMonthBtn.classList.add('bg-indigo-50', 'text-indigo-700');
-            renderSpendingEvolutionChart(allTransactions, 'day');
         });
-
-        evolutionFilterMonthBtn.addEventListener('click', () => {
-            evolutionFilterMonthBtn.classList.add('bg-indigo-700', 'text-white');
-            evolutionFilterDayBtn.classList.remove('bg-indigo-700', 'text-white');
-            evolutionFilterMonthBtn.classList.remove('bg-indigo-50', 'text-indigo-700');
-            evolutionFilterDayBtn.classList.add('bg-indigo-50', 'text-indigo-700');
-            renderSpendingEvolutionChart(allTransactions, 'month');
-        });
-
-        window.deleteCategoryBudget = (category) => {
-            delete categoryBudgets[category];
-            saveDataToLocalStorage();
-            renderAll();
-        };
-
-        function loadTransactionForEdit(id) {
-            const transaction = allTransactions.find(t => t.id === id);
-            if (transaction) {
-                descriptionInput.value = transaction.description;
-                detailInput.value = transaction.detail || '';
-                amountInput.value = transaction.amount;
-                paymentMethodInput.value = transaction.paymentMethod;
-                categoryInput.value = transaction.category;
-                
-                const formattedDate = transaction.timestamp.toISOString().slice(0, 16);
-                transactionDatetimeInput.value = formattedDate;
-
-                transactionIdToEditInput.value = transaction.id;
-                submitButton.textContent = 'Atualizar Gasto';
-                submitButton.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-                submitButton.classList.add('bg-blue-600', 'hover:bg-blue-700');
-            }
-        }
         
-        function deleteTransaction(id) {
-            allTransactions = allTransactions.filter(t => t.id !== id);
-            saveDataToLocalStorage();
-            renderAll();
+        function resetExpenseForm() {
+            expenseForm.reset();
+            document.getElementById('expenseId').value = '';
+            document.getElementById('cancel-expense-edit-btn').classList.add('hidden');
         }
 
-        function updateTransaction(id, updatedData) {
-            const index = allTransactions.findIndex(t => t.id === id);
-            if (index !== -1) {
-                allTransactions[index] = { ...allTransactions[index], ...updatedData };
-            }
-            saveDataToLocalStorage();
-            resetForm();
-            renderAll();
-        }
-        
-        function resetForm() {
-            descriptionInput.value = '';
-            detailInput.value = '';
-            amountInput.value = '';
-            paymentMethodInput.value = '';
-            categoryInput.value = '';
-            transactionIdToEditInput.value = '';
-            
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            transactionDatetimeInput.value = now.toISOString().slice(0, 16);
-            
-            submitButton.textContent = 'Adicionar Gasto';
-            submitButton.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-            submitButton.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-        }
+        document.getElementById('cancel-expense-edit-btn').addEventListener('click', resetExpenseForm);
 
-        form.addEventListener('submit', (e) => {
+        // --- LÓGICA DE CATEGORIAS ---
+        addCategoryForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const newCategoryName = document.getElementById('newCategoryName').value.trim();
+            if (newCategoryName) {
+                await addDoc(collection(db, "categories"), {
+                    name: newCategoryName,
+                    uid: auth.currentUser.uid
+                });
+                addCategoryForm.reset();
+            }
+        });
 
-            const description = descriptionInput.value.trim();
-            const detail = detailInput.value.trim();
-            const amount = parseFloat(amountInput.value);
-            const paymentMethod = paymentMethodInput.value;
-            const category = categoryInput.value;
-            const transactionIdToEdit = transactionIdToEditInput.value;
-            const transactionDatetime = transactionDatetimeInput.value;
+        // --- ATUALIZAÇÕES DE UI ---
+        function updateCategoryUI(categories) {
+            categoryList.innerHTML = '';
+            expenseCategorySelect.innerHTML = '';
+            filterCategorySelect.innerHTML = '<option value="all">Todas as Categorias</option>';
 
-            if (description && !isNaN(amount) && amount > 0 && paymentMethod && category && transactionDatetime) {
-                const transactionData = { 
-                    description, 
-                    detail,
-                    amount, 
-                    paymentMethod, 
-                    category,
-                    timestamp: new Date(transactionDatetime)
-                };
+            categories.sort((a, b) => a.name.localeCompare(b.name)).forEach(cat => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-600 rounded';
+                div.innerHTML = `<span class="dark:text-gray-200">${cat.name}</span><button data-id="${cat.id}" class="delete-category-btn text-red-500 hover:text-red-700">Excluir</button>`;
+                categoryList.appendChild(div);
                 
-                if (transactionIdToEdit) {
-                    updateTransaction(transactionIdToEdit, transactionData);
-                } else {
-                    const newId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
-                    allTransactions.push({ id: newId, ...transactionData });
-                    saveDataToLocalStorage();
-                    resetForm();
-                    renderAll();
-                }
-            } else {
-                showModal('Por favor, preencha todos os campos corretamente.');
-            }
-        });
-        
-        categoryBudgetForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const category = budgetCategorySelect.value;
-            const budgetAmount = parseFloat(budgetAmountInput.value);
-
-            if (category && !isNaN(budgetAmount) && budgetAmount >= 0) {
-                categoryBudgets[category] = budgetAmount;
-                saveDataToLocalStorage();
-                budgetAmountInput.value = '';
-                budgetCategorySelect.value = '';
-                renderAll();
-            } else {
-                showModal('Por favor, selecione uma categoria e insira um valor válido para o orçamento.');
-            }
-        });
-
-        addCategoryForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newCategory = newCategoryInput.value.trim();
-            if (newCategory && !customOptions.categories.includes(newCategory)) {
-                customOptions.categories.push(newCategory);
-                saveDataToLocalStorage();
-                newCategoryInput.value = '';
-                renderAll();
-            } else if (customOptions.categories.includes(newCategory)) {
-                showModal('Essa categoria já existe.');
-            }
-        });
-
-        addPaymentForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newPaymentMethod = newPaymentInput.value.trim();
-            if (newPaymentMethod && !customOptions.paymentMethods.includes(newPaymentMethod)) {
-                customOptions.paymentMethods.push(newPaymentMethod);
-                saveDataToLocalStorage();
-                newPaymentInput.value = '';
-                renderAll();
-            } else if (customOptions.paymentMethods.includes(newPaymentMethod)) {
-                showModal('Essa forma de pagamento já existe.');
-            }
-        });
-
-        // Adiciona event listeners para os botões de filtro da Tela Principal
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                resetActiveFilters();
-                
-                button.classList.add('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
-                button.classList.remove('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
-
-                if (button.id === 'filter-by-date-button') {
-                    const startDate = startDateInput.value;
-                    const endDate = endDateInput.value;
-                    if (startDate && endDate) {
-                        currentFilter = 'date-range';
-                        applyFilterAndRender();
-                    } else {
-                        showModal('Por favor, selecione uma data de início e de fim.');
-                        currentFilter = 'all';
-                        resetActiveFilters();
-                    }
-                } else {
-                    currentFilter = button.id.replace('filter-', '');
-                    startDateInput.value = '';
-                    endDateInput.value = '';
-                    applyFilterAndRender();
-                }
+                const option = document.createElement('option');
+                option.value = cat.name;
+                option.textContent = cat.name;
+                expenseCategorySelect.appendChild(option.cloneNode(true));
+                filterCategorySelect.appendChild(option);
             });
-        });
-
-        // Lógica de filtragem para o Dashboard
-        dashboardFilterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                resetDashboardActiveFilters();
-                button.classList.remove('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
-                button.classList.add('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
-
-                if (button.id === 'dashboard-filter-by-date-button') {
-                    const startDate = dashboardStartDateInput.value;
-                    const endDate = dashboardEndDateInput.value;
-                    if (startDate && endDate) {
-                        currentDashboardFilter = 'date-range';
-                    } else {
-                        showModal('Por favor, selecione um intervalo de datas válido.');
-                        currentDashboardFilter = 'month';
-                        resetDashboardActiveFilters();
-                        return;
-                    }
-                } else {
-                    currentDashboardFilter = button.id.replace('dashboard-filter-', '');
-                    dashboardStartDateInput.value = '';
-                    dashboardEndDateInput.value = '';
-                }
-                applyDashboardFilterAndRender();
+            
+            filterPaymentSelect.innerHTML = '<option value="all">Todas as Formas</option>';
+            ['Crédito', 'Dinheiro', 'Débito', 'Pix', 'VA'].forEach(method => {
+                const option = document.createElement('option');
+                option.value = method;
+                option.textContent = method;
+                filterPaymentSelect.appendChild(option);
             });
-        });
-        
-        function resetActiveFilters() {
-            filterButtons.forEach(btn => {
-                btn.classList.remove('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
-                btn.classList.add('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
-            });
-            const allButton = document.getElementById('filter-all');
-            if (currentFilter === 'all' || !currentFilter) {
-                 allButton.classList.remove('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
-                 allButton.classList.add('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
-            }
         }
         
-        function resetDashboardActiveFilters() {
-             dashboardFilterButtons.forEach(btn => {
-                btn.classList.remove('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
-                btn.classList.add('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
-            });
-            const monthButton = document.getElementById('dashboard-filter-month');
-            if (currentDashboardFilter === 'month') {
-                monthButton.classList.remove('bg-indigo-50', 'text-indigo-700', 'hover:bg-indigo-200');
-                monthButton.classList.add('bg-indigo-700', 'text-white', 'hover:bg-indigo-800');
-            }
-        }
-
-        exportButton.addEventListener('click', () => {
-            if (allTransactions.length === 0) {
-                showModal('Não há dados para exportar.');
+        function updateExpensesTable(expenses) {
+            expensesBody.innerHTML = '';
+            if (expenses.length === 0) {
+                expensesBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Nenhum gasto encontrado para os filtros selecionados.</td></tr>`;
                 return;
             }
-
-            const header = ['Descrição', 'Detalhe', 'Valor (R$)', 'Forma de Pagamento', 'Categoria', 'Data e Hora'];
-            const data = allTransactions.map(transaction => [
-                transaction.description,
-                transaction.detail || '',
-                transaction.amount,
-                transaction.paymentMethod,
-                transaction.category,
-                transaction.timestamp.toLocaleString('pt-BR')
-            ]);
-            
-            const worksheetData = [header, ...data];
-
-            const ws = XLSX.utils.aoa_to_sheet(worksheetData);
-            
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Gastos');
-
-            XLSX.writeFile(wb, 'gastos.xlsx');
-
-            showModal('Dados exportados com sucesso!');
-        });
-
-        // Lógica de backup e restauração
-        exportBackupButton.addEventListener('click', () => {
-            const dataToExport = {
-                transactions: allTransactions,
-                categoryBudgets: categoryBudgets,
-                customOptions: customOptions
-            };
-            const jsonString = JSON.stringify(dataToExport, null, 2);
-            const blob = new Blob([jsonString], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `gastos_backup.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            showModal('Backup exportado com sucesso!');
-        });
+            expenses.forEach(exp => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${exp.date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${exp.description}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${exp.category}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${exp.paymentMethod}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(exp.value)}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button class="edit-expense-btn text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" data-id="${exp.id}">Editar</button>
+                        <button class="delete-expense-btn text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" data-id="${exp.id}">Excluir</button>
+                    </td>
+                `;
+                expensesBody.appendChild(row);
+            });
+        }
         
-        importDataButton.addEventListener('click', () => {
-            importDataFileInput.click();
-        });
+        Chart.register(ChartDataLabels);
 
-        importDataFileInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
+        function updateDashboardSummaries(expenses) {
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const yesterdayStart = new Date(new Date().setDate(todayStart.getDate() - 1));
+            
+            const weekStart = new Date(now);
+            const dayOfWeek = weekStart.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+            const diff = weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday to make Monday the first day
+            weekStart.setDate(diff);
+            weekStart.setHours(0, 0, 0, 0);
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (importedData.transactions && importedData.categoryBudgets && importedData.customOptions) {
-                        allTransactions = importedData.transactions.map(t => ({ ...t, timestamp: new Date(t.timestamp) }));
-                        categoryBudgets = importedData.categoryBudgets;
-                        customOptions = importedData.customOptions;
-                        saveDataToLocalStorage();
-                        renderAll();
-                        showModal('Dados importados com sucesso! O aplicativo foi atualizado.');
-                    } else {
-                        showModal('O arquivo selecionado não tem o formato de backup esperado.');
-                    }
-                } catch (error) {
-                    console.error("Erro ao importar o arquivo:", error);
-                    showModal('Erro ao processar o arquivo. Certifique-se de que é um arquivo JSON válido.');
-                }
-                importDataFileInput.value = '';
-            };
-            reader.readAsText(file);
-        });
+            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-        function showModal(message) {
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50';
-            modal.innerHTML = `
-                <div class="bg-white p-6 rounded-xl shadow-lg max-w-sm mx-auto z-50">
-                    <h3 class="text-xl font-bold mb-4 text-gray-800">Atenção</h3>
-                    <p class="text-gray-700 mb-4">${message}</p>
-                    <div class="flex justify-end">
-                        <button class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors" onclick="this.closest('.fixed').remove()">OK</button>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
+            const sum = (arr) => arr.reduce((acc, item) => acc + item.value, 0);
+            const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+            
+            const monthExpenses = expenses.filter(e => e.date >= monthStart);
+            const totalMonth = sum(monthExpenses);
+            const dayOfMonth = now.getDate();
+            const dailyAverage = totalMonth > 0 ? totalMonth / dayOfMonth : 0;
+
+            document.getElementById('summary-today').textContent = formatCurrency(sum(expenses.filter(e => e.date >= todayStart)));
+            document.getElementById('summary-yesterday').textContent = formatCurrency(sum(expenses.filter(e => e.date >= yesterdayStart && e.date < todayStart)));
+            document.getElementById('summary-week').textContent = formatCurrency(sum(expenses.filter(e => e.date >= weekStart)));
+            document.getElementById('summary-month').textContent = formatCurrency(totalMonth);
+            document.getElementById('summary-avg-daily').textContent = formatCurrency(dailyAverage);
+        }
+        
+        function destroyAllCharts() {
+            Object.values(activeCharts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            activeCharts = {};
         }
 
-        // Lógica de Tema Claro/Escuro
-        function applyTheme(theme) {
-            const htmlElement = document.documentElement;
-            if (theme === 'dark') {
-                htmlElement.classList.add('dark');
-                themeIcon.textContent = '☀️';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                htmlElement.classList.remove('dark');
-                themeIcon.textContent = '🌙';
-                localStorage.setItem('theme', 'light');
+        function updateAllCharts(dashboardExpenses, gastosFilteredExpenses) {
+            destroyAllCharts();
+            const monthFilter = dashboardMonthFilter.value;
+            
+            update7DayChart(gastosFilteredExpenses); // Gráfico de Gastos usa dados filtrados da página de gastos
+            updateMonthlyOrDailyChart(dashboardExpenses, monthFilter); // Gráficos do Dashboard usam dados filtrados pelo mês
+            updateCategoryParetoChart(dashboardExpenses);
+            updateWeekdayParetoChart(dashboardExpenses);
+            updateDescriptionRankingChart(dashboardExpenses);
+        }
+        
+        function getChartColors() {
+            const isDarkMode = document.documentElement.classList.contains('dark');
+            return {
+                gridColor: isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+                textColor: isDarkMode ? '#e5e7eb' : '#374151'
+            };
+        }
+
+        function update7DayChart(expenses) {
+            const colors = getChartColors();
+            const last7Days = {};
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                d.setHours(0,0,0,0);
+                last7Days[d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})] = 0;
             }
-            // Recarrega os gráficos com o novo tema
-            if (myPieChartMain) myPieChartMain.destroy();
-            if (myParetoChart) myParetoChart.destroy();
-            if (mySpendingQuantityChart) mySpendingQuantityChart.destroy();
-            if (mySpendingRankingChart) mySpendingRankingChart.destroy();
-            if (mySpendingEvolutionChart) mySpendingEvolutionChart.destroy();
+            
+            const sevenDaysAgo = new Date();
+            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+            sevenDaysAgo.setHours(0,0,0,0);
 
-            myPieChartMain = null;
-            myParetoChart = null;
-            mySpendingQuantityChart = null;
-            mySpendingRankingChart = null;
-            mySpendingEvolutionChart = null;
+            const relevantExpenses = expenses.filter(e => e.date >= sevenDaysAgo);
 
-            renderAll();
-            applyDashboardFilterAndRender();
+            relevantExpenses.forEach(e => {
+                const key = e.date.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+                if (key in last7Days) {
+                    last7Days[key] += e.value;
+                }
+            });
+            const chartLabels = Object.keys(last7Days);
+            const chartData = Object.values(last7Days);
+            
+            const total7Days = chartData.reduce((a, b) => a + b, 0);
+            const percentageData = chartData.map(value => total7Days > 0 ? (value / total7Days) * 100 : 0);
+
+            const ctx = document.getElementById('expenses-chart').getContext('2d');
+            activeCharts['7day'] = new Chart(ctx, {
+                type: 'bar',
+                data: { 
+                    labels: chartLabels, 
+                    datasets: [
+                        { 
+                            label: 'Gasto Diário (R$)', 
+                            data: chartData, 
+                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                            yAxisID: 'y',
+                            order: 1 // Barra fica atrás
+                        },
+                        {
+                            label: '% do Total',
+                            data: percentageData,
+                            type: 'line',
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            yAxisID: 'y1',
+                            order: 0, // Linha fica na frente
+                            datalabels: {
+                                display: true,
+                                anchor: 'end',
+                                align: 'end',
+                                color: 'rgb(255, 99, 132)',
+                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                borderRadius: 4,
+                                padding: 4,
+                                font: { weight: 'bold' },
+                                formatter: (value) => value > 0 ? value.toFixed(1) + '%' : '',
+                            }
+                        }
+                    ] 
+                },
+                options: {
+                    responsive: true,
+                    interaction: { mode: 'index', intersect: false },
+                    scales: { 
+                        y: { type: 'linear', display: true, position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
+                        y1: { type: 'linear', display: false, position: 'right', grid: { drawOnChartArea: false } },
+                        x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }
+                    },
+                    plugins: {
+                        legend: { labels: { color: colors.textColor } },
+                        datalabels: {
+                            display: (context) => context.dataset.type !== 'line',
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => value > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : '',
+                            color: colors.textColor,
+                            font: { weight: 'bold' }
+                        }
+                    }
+                }
+            });
         }
-        
-        themeToggleButton.addEventListener('click', () => {
-            const currentTheme = localStorage.getItem('theme') || 'light';
-            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-            applyTheme(newTheme);
+
+        function updateMonthlyOrDailyChart(expenses, monthFilter) {
+            const colors = getChartColors();
+            const chartTitleEl = document.getElementById('monthly-chart-title');
+            let chartData, chartLabels, chartTitle, chartLabel;
+
+            if (monthFilter === 'all') {
+                chartTitle = 'Gastos por Mês (Ano Atual)';
+                chartLabel = 'Gasto Mensal (R$)';
+                const monthlyTotals = Array(12).fill(0);
+                const currentYear = new Date().getFullYear();
+                expenses.filter(e => e.date.getFullYear() === currentYear).forEach(e => {
+                    monthlyTotals[e.date.getMonth()] += e.value;
+                });
+                chartData = monthlyTotals;
+                chartLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            } else {
+                const [year, month] = monthFilter.split('-').map(Number);
+                const date = new Date(year, month - 1, 1);
+                const monthName = date.toLocaleString('pt-BR', { month: 'long' });
+                chartTitle = `Gastos por Dia (${monthName.charAt(0).toUpperCase() + monthName.slice(1)})`;
+                chartLabel = 'Gasto Diário (R$)';
+                
+                const daysInMonth = new Date(year, month, 0).getDate();
+                const dailyTotals = Array(daysInMonth).fill(0);
+                expenses.forEach(e => {
+                    dailyTotals[e.date.getDate() - 1] += e.value;
+                });
+                chartData = dailyTotals;
+                chartLabels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+            }
+            
+            chartTitleEl.textContent = chartTitle;
+            const ctx = document.getElementById('monthly-chart').getContext('2d');
+            activeCharts['monthly'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: chartLabel,
+                        data: chartData,
+                        backgroundColor: 'rgba(79, 70, 229, 0.8)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
+                        x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => value > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value) : '',
+                            color: colors.textColor
+                        }
+                    }
+                }
+            });
+        }
+
+        function createParetoChart(canvasId, data, label) {
+            const colors = getChartColors();
+            const sortedData = Object.entries(data).sort(([,a],[,b]) => b-a);
+            const labels = sortedData.map(item => item[0]);
+            const values = sortedData.map(item => item[1]);
+            const total = values.reduce((sum, val) => sum + val, 0);
+            let cumulative = 0;
+            const cumulativePercentage = values.map(val => {
+                cumulative += val;
+                return total > 0 ? (cumulative / total) * 100 : 0;
+            });
+
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            activeCharts[canvasId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Gasto (R$)',
+                            data: values,
+                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
+                            yAxisID: 'y',
+                        },
+                        {
+                            label: 'Cumulativo %',
+                            data: cumulativePercentage,
+                            type: 'line',
+                            borderColor: 'rgb(255, 99, 132)',
+                            yAxisID: 'y1',
+                            datalabels: {
+                                display: true,
+                                anchor: 'end',
+                                align: 'top',
+                                color: 'rgb(255, 99, 132)',
+                                formatter: (value) => value.toFixed(1) + '%',
+                            }
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { type: 'linear', position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
+                        y1: { type: 'linear', position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { color: colors.textColor, callback: value => value + '%' } },
+                        x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } // Eixo X adicionado
+                    },
+                    plugins: {
+                        legend: { labels: { color: colors.textColor } },
+                        datalabels: {
+                            display: (context) => context.dataset.type !== 'line',
+                            anchor: 'end',
+                            align: 'top',
+                            formatter: (value) => value > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value) : '',
+                            color: colors.textColor
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateCategoryParetoChart(expenses) {
+            const categoryTotals = expenses.reduce((acc, exp) => {
+                acc[exp.category] = (acc[exp.category] || 0) + exp.value;
+                return acc;
+            }, {});
+            createParetoChart('category-pareto-chart', categoryTotals, 'Gasto por Categoria');
+        }
+
+        function updateWeekdayParetoChart(expenses) {
+            const weekdayTotals = { 'Dom': 0, 'Seg': 0, 'Ter': 0, 'Qua': 0, 'Qui': 0, 'Sex': 0, 'Sáb': 0 };
+            const weekdayOrder = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+            expenses.forEach(exp => {
+                const day = weekdayOrder[exp.date.getDay()];
+                weekdayTotals[day] += exp.value;
+            });
+            createParetoChart('weekday-pareto-chart', weekdayTotals, 'Gasto por Dia da Semana');
+        }
+
+        function updateDescriptionRankingChart(expenses) {
+            const colors = getChartColors();
+            const descriptionTotals = expenses.reduce((acc, exp) => {
+                acc[exp.description] = (acc[exp.description] || 0) + exp.value;
+                return acc;
+            }, {});
+
+            const sortedData = Object.entries(descriptionTotals).sort(([,a],[,b]) => b-a).slice(0, 10); // Top 10
+            const labels = sortedData.map(item => item[0]);
+            const values = sortedData.map(item => item[1]);
+
+            const ctx = document.getElementById('description-ranking-chart').getContext('2d');
+            activeCharts['description-ranking'] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Gasto (R$)',
+                        data: values,
+                        backgroundColor: 'rgba(22, 163, 74, 0.8)',
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // Faz o gráfico ser de barras horizontais
+                    responsive: true,
+                    scales: {
+                        y: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
+                        x: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            formatter: (value) => value > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : '',
+                            color: colors.textColor
+                        }
+                    }
+                }
+            });
+        }
+
+
+        // --- EVENT LISTENERS DINÂMICOS ---
+        document.body.addEventListener('click', async (e) => {
+            if (e.target.matches('.delete-category-btn')) {
+                if (confirm('Tem certeza?')) await deleteDoc(doc(db, "categories", e.target.dataset.id));
+            }
+            if (e.target.matches('.delete-expense-btn')) {
+                if (confirm('Tem certeza?')) await deleteDoc(doc(db, "expenses", e.target.dataset.id));
+            }
+            if (e.target.matches('.edit-expense-btn')) {
+                const id = e.target.dataset.id;
+                const expenseToEdit = allExpenses.find(exp => exp.id === id);
+                if (expenseToEdit) {
+                    populateExpenseForm(expenseToEdit);
+                }
+            }
         });
 
-        // Inicializa o aplicativo carregando os dados e renderizando a interface
-        window.onload = () => {
-            loadDataFromLocalStorage();
-            renderAll();
-            resetActiveFilters();
-            resetDashboardActiveFilters();
-            resetForm();
+        function populateExpenseForm(expense) {
+            document.getElementById('expenseId').value = expense.id;
+            document.getElementById('expenseDescription').value = expense.description;
+            document.getElementById('expenseDetail').value = expense.detail;
+            
+            const date = new Date(expense.date);
+            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+            document.getElementById('expenseDate').value = date.toISOString().slice(0,16);
+            
+            document.getElementById('expenseValue').value = expense.value;
+            document.getElementById('expensePayment').value = expense.paymentMethod;
+            document.getElementById('expenseCategory').value = expense.category;
+            
+            document.getElementById('cancel-expense-edit-btn').classList.remove('hidden');
+        }
 
-            // Carrega o tema salvo no localStorage
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            applyTheme(savedTheme);
-        };
+        // --- NAVEGAÇÃO E MODAIS ---
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
+                document.querySelectorAll('.nav-link').forEach(l => {
+                    l.classList.remove('bg-gray-900', 'text-gray-100');
+                    l.classList.add('text-gray-400');
+                });
+                
+                const sectionId = e.currentTarget.id.replace('nav-', 'section-');
+                document.getElementById(sectionId).classList.remove('hidden');
+                e.currentTarget.classList.add('bg-gray-900', 'text-gray-100');
+                e.currentTarget.classList.remove('text-gray-400');
+
+                if(sectionId === 'section-dashboard' || sectionId === 'section-gastos') {
+                    applyFiltersAndRender(); 
+                }
+            });
+        });
+        
+        document.getElementById('manage-categories-btn').addEventListener('click', () => {
+            categoryModal.classList.remove('hidden');
+            setTimeout(() => categoryModal.classList.remove('opacity-0'), 10);
+        });
+        document.getElementById('close-category-modal-btn').addEventListener('click', () => {
+            categoryModal.classList.add('opacity-0');
+            setTimeout(() => categoryModal.classList.add('hidden'), 300);
+        });
+        
+        // --- CÓPIA DOS CÓDIGOS DE LOGIN/REGISTO ---
+        document.getElementById('login-form').addEventListener('submit', (e) => e.preventDefault());
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            errorMessage.textContent = '';
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error("Erro de login:", error.message);
+                errorMessage.textContent = 'Email ou senha inválidos.';
+            }
+        });
+        document.getElementById('register-btn').addEventListener('click', async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+             errorMessage.textContent = '';
+            if (password.length < 6) {
+                errorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                return;
+            }
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error("Erro de registo:", error.message);
+                errorMessage.textContent = 'Não foi possível registar. O email pode já estar em uso.';
+            }
+        });
 
     </script>
 </body>
