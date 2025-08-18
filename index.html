@@ -89,14 +89,14 @@
                 <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
                     <section id="section-gastos" class="page-section">
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Gasto Hoje</h3><p id="summary-today" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Gasto Ontem</h3><p id="summary-yesterday" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Esta Semana</h3><p id="summary-week" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Este Mês</h3><p id="summary-month" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Média Diária</h3><p id="summary-avg-daily" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Gasto Hoje</h3><p id="summary-today" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p><div id="summary-today-indicator" class="text-xs"></div></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Gasto Ontem</h3><p id="summary-yesterday" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p><div id="summary-yesterday-indicator" class="text-xs"></div></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Esta Semana</h3><p id="summary-week" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p><div id="summary-week-indicator" class="text-xs"></div></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Este Mês</h3><p id="summary-month" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p><div id="summary-month-indicator" class="text-xs"></div></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Média Diária (Mês)</h3><p id="summary-avg-daily" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Gastos nos Últimos 7 Dias</h2><div class="h-80 relative"><canvas id="expenses-chart"></canvas></div></div>
+                            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Gastos nos Últimos 8 Dias</h2><div class="h-80 relative"><canvas id="expenses-chart"></canvas></div></div>
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Lançar Gasto</h2><form id="expense-form"><input type="hidden" id="expenseId"><div class="space-y-4"><input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><input type="datetime-local" id="expenseDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><option>Crédito</option><option>Dinheiro</option><option>Débito</option><option>Pix</option><option>VA</option></select><div class="flex items-center space-x-2"><select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select><button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button></div><button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button><button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button></div></form></div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
@@ -132,6 +132,16 @@
                             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
                                 <label for="dashboard-month-filter" class="text-gray-600 dark:text-gray-300 sm:hidden">Filtrar por:</label>
                                 <select id="dashboard-month-filter" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600" title="Filtro por Mês"></select>
+                                <select id="dashboard-weekday-filter" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600" title="Filtro por Dia da Semana">
+                                    <option value="all">Todos os dias</option>
+                                    <option value="0">Domingo</option>
+                                    <option value="1">Segunda-feira</option>
+                                    <option value="2">Terça-feira</option>
+                                    <option value="3">Quarta-feira</option>
+                                    <option value="4">Quinta-feira</option>
+                                    <option value="5">Sexta-feira</option>
+                                    <option value="6">Sábado</option>
+                                </select>
                                 <input type="date" id="dashboard-date-filter" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" title="Filtro por Dia">
                                 <button id="clear-dashboard-filters-btn" class="w-full sm:w-auto bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500">Limpar</button>
                             </div>
@@ -202,6 +212,7 @@
         const filterDate = document.getElementById('filter-date');
         const dashboardMonthFilter = document.getElementById('dashboard-month-filter');
         const dashboardDateFilter = document.getElementById('dashboard-date-filter');
+        const dashboardWeekdayFilter = document.getElementById('dashboard-weekday-filter');
         const loginThemeToggleButton = document.getElementById('login-theme-toggle-btn');
         const themeToggleButton = document.getElementById('theme-toggle-btn');
         const sidebar = document.getElementById('sidebar');
@@ -405,22 +416,33 @@
             const dateFilterValue = filterDate.value;
 
             let filteredExpenses = allExpenses.filter(exp => {
-                const matchDate = !dateFilterValue || exp.date.toISOString().startsWith(dateFilterValue);
+                let matchDate = true;
+                if (dateFilterValue) {
+                    const startOfDay = new Date(dateFilterValue + 'T00:00:00');
+                    const endOfDay = new Date(dateFilterValue + 'T23:59:59.999');
+                    matchDate = exp.date >= startOfDay && exp.date <= endOfDay;
+                }
+
                 const matchDescription = !descriptionFilter || exp.description.toLowerCase().includes(descriptionFilter);
                 const matchCategory = categoryFilter === 'all' || exp.category === categoryFilter;
                 const matchPayment = paymentFilter === 'all' || exp.paymentMethod === paymentFilter;
                 return matchDate && matchDescription && matchCategory && matchPayment;
             });
             
-            updateDashboardSummaries(filteredExpenses);
+            updateDashboardSummaries(allExpenses);
             updateExpensesTable(filteredExpenses);
 
             const monthFilter = dashboardMonthFilter.value;
             const dashboardDateValue = dashboardDateFilter.value;
+            const dashboardWeekdayValue = dashboardWeekdayFilter.value;
             let dashboardExpenses = allExpenses;
 
             if (dashboardDateValue) {
-                dashboardExpenses = allExpenses.filter(exp => exp.date.toISOString().startsWith(dashboardDateValue));
+                const startOfDay = new Date(dashboardDateValue + 'T00:00:00');
+                const endOfDay = new Date(dashboardDateValue + 'T23:59:59.999');
+                dashboardExpenses = allExpenses.filter(exp => exp.date >= startOfDay && exp.date <= endOfDay);
+            } else if (dashboardWeekdayValue !== 'all') {
+                dashboardExpenses = allExpenses.filter(exp => exp.date.getDay() == dashboardWeekdayValue);
             } else if (monthFilter !== 'all') {
                 const [year, month] = monthFilter.split('-').map(Number);
                 dashboardExpenses = allExpenses.filter(exp => exp.date.getFullYear() === year && exp.date.getMonth() === month - 1);
@@ -429,7 +451,7 @@
             updateAllCharts(dashboardExpenses, filteredExpenses);
         }
 
-        [filterDescription, filterCategorySelect, filterPaymentSelect, filterDate, dashboardMonthFilter, dashboardDateFilter].forEach(el => el.addEventListener('input', applyFiltersAndRender));
+        [filterDescription, filterCategorySelect, filterPaymentSelect, filterDate, dashboardMonthFilter, dashboardDateFilter, dashboardWeekdayFilter].forEach(el => el.addEventListener('input', applyFiltersAndRender));
         
         document.getElementById('clear-filters-btn').addEventListener('click', () => {
             filterDescription.value = '';
@@ -442,16 +464,31 @@
         document.getElementById('clear-dashboard-filters-btn').addEventListener('click', () => {
             dashboardMonthFilter.value = 'all';
             dashboardDateFilter.value = '';
+            dashboardWeekdayFilter.value = 'all';
             applyFiltersAndRender();
         });
 
         dashboardDateFilter.addEventListener('input', () => {
-            if (dashboardDateFilter.value) dashboardMonthFilter.value = 'all';
+            if (dashboardDateFilter.value) {
+                dashboardMonthFilter.value = 'all';
+                dashboardWeekdayFilter.value = 'all';
+            }
             applyFiltersAndRender();
         });
 
         dashboardMonthFilter.addEventListener('input', () => {
-            if (dashboardMonthFilter.value !== 'all') dashboardDateFilter.value = '';
+            if (dashboardMonthFilter.value !== 'all') {
+                dashboardDateFilter.value = '';
+                dashboardWeekdayFilter.value = 'all';
+            }
+            applyFiltersAndRender();
+        });
+
+        dashboardWeekdayFilter.addEventListener('input', () => {
+            if (dashboardWeekdayFilter.value !== 'all') {
+                dashboardDateFilter.value = '';
+                dashboardMonthFilter.value = 'all';
+            }
             applyFiltersAndRender();
         });
 
@@ -542,32 +579,77 @@
         
         Chart.register(ChartDataLabels);
 
-        function updateDashboardSummaries(filteredExpenses) {
-            const now = new Date();
-            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const tomorrowStart = new Date(todayStart);
-            tomorrowStart.setDate(todayStart.getDate() + 1);
-            const yesterdayStart = new Date(todayStart);
-            yesterdayStart.setDate(todayStart.getDate() - 1);
-            
-            const weekStart = new Date(now);
-            weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
-            weekStart.setHours(0, 0, 0, 0);
-
-            const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-
+        function updateDashboardSummaries(allExpensesData) {
             const sum = (arr) => arr.reduce((acc, item) => acc + item.value, 0);
             const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
+
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const tomorrowStart = new Date(todayStart); tomorrowStart.setDate(todayStart.getDate() + 1);
+            const yesterdayStart = new Date(todayStart); yesterdayStart.setDate(todayStart.getDate() - 1);
+            const dayBeforeYesterdayStart = new Date(yesterdayStart); dayBeforeYesterdayStart.setDate(yesterdayStart.getDate() - 1);
             
-            document.getElementById('summary-today').textContent = formatCurrency(sum(filteredExpenses.filter(e => e.date >= todayStart && e.date < tomorrowStart)));
-            document.getElementById('summary-yesterday').textContent = formatCurrency(sum(filteredExpenses.filter(e => e.date >= yesterdayStart && e.date < todayStart)));
-            document.getElementById('summary-week').textContent = formatCurrency(sum(filteredExpenses.filter(e => e.date >= weekStart)));
-            document.getElementById('summary-month').textContent = formatCurrency(sum(filteredExpenses.filter(e => e.date >= monthStart)));
+            const currentWeekStart = new Date(now);
+            currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + (currentWeekStart.getDay() === 0 ? -6 : 1));
+            currentWeekStart.setHours(0, 0, 0, 0);
+            const previousWeekStart = new Date(currentWeekStart); previousWeekStart.setDate(currentWeekStart.getDate() - 7);
+            const previousWeekEnd = new Date(currentWeekStart);
+
+            const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+            const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+            const previousMonthEquivalentEnd = new Date(previousMonthStart);
+            previousMonthEquivalentEnd.setDate(previousMonthEquivalentEnd.getDate() + now.getDate());
+
+            const expensesToday = sum(allExpensesData.filter(e => e.date >= todayStart && e.date < tomorrowStart));
+            const expensesYesterday = sum(allExpensesData.filter(e => e.date >= yesterdayStart && e.date < todayStart));
+            const expensesDayBeforeYesterday = sum(allExpensesData.filter(e => e.date >= dayBeforeYesterdayStart && e.date < yesterdayStart));
+            const expensesThisWeek = sum(allExpensesData.filter(e => e.date >= currentWeekStart));
+            const expensesLastWeek = sum(allExpensesData.filter(e => e.date >= previousWeekStart && e.date < previousWeekEnd));
+            const expensesThisMonth = sum(allExpensesData.filter(e => e.date >= currentMonthStart));
+            const expensesLastMonth = sum(allExpensesData.filter(e => e.date >= previousMonthStart && e.date < previousMonthEquivalentEnd));
+
+            document.getElementById('summary-today').textContent = formatCurrency(expensesToday);
+            document.getElementById('summary-yesterday').textContent = formatCurrency(expensesYesterday);
+            document.getElementById('summary-week').textContent = formatCurrency(expensesThisWeek);
+            document.getElementById('summary-month').textContent = formatCurrency(expensesThisMonth);
             
-            const allMonthExpenses = allExpenses.filter(e => e.date >= monthStart);
-            const totalMonth = sum(allMonthExpenses);
+            updateIndicator('summary-today-indicator', expensesToday, expensesYesterday, 'ontem');
+            updateIndicator('summary-yesterday-indicator', expensesYesterday, expensesDayBeforeYesterday, 'anteontem');
+            updateIndicator('summary-week-indicator', expensesThisWeek, expensesLastWeek, 'semana anterior');
+            updateIndicator('summary-month-indicator', expensesThisMonth, expensesLastMonth, 'mês anterior');
+
+            const totalMonth = sum(allExpensesData.filter(e => e.date >= currentMonthStart));
             const dailyAverage = totalMonth > 0 ? totalMonth / now.getDate() : 0;
             document.getElementById('summary-avg-daily').textContent = formatCurrency(dailyAverage);
+        }
+
+        function updateIndicator(elementId, current, previous, periodText) {
+            const indicatorEl = document.getElementById(elementId);
+            if (!indicatorEl) return;
+
+            if (previous === 0) {
+                indicatorEl.innerHTML = current > 0 ? `<span class="text-xs text-gray-500 dark:text-gray-400">Sem dados anteriores</span>` : '';
+                return;
+            }
+
+            const valueDiff = current - previous;
+            const diffPercentage = (valueDiff / previous) * 100;
+            const formattedValueDiff = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', signDisplay: 'always' }).format(valueDiff);
+
+            let colorClass, icon;
+            if (valueDiff > 0) {
+                colorClass = 'text-red-500';
+                icon = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>`;
+            } else if (valueDiff < 0) {
+                colorClass = 'text-green-500';
+                icon = `<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>`;
+            } else {
+                colorClass = 'text-gray-500 dark:text-gray-400';
+                icon = '';
+            }
+
+            indicatorEl.className = `flex items-center gap-1 text-xs font-medium ${colorClass}`;
+            indicatorEl.innerHTML = `${icon} <span class="font-bold">${formattedValueDiff}</span> <span>(${diffPercentage.toFixed(1)}%) vs. ${periodText}</span>`;
         }
         
         function destroyAllCharts() {
@@ -601,22 +683,57 @@
 
         function update7DayChart(expenses) {
             const colors = getChartColors();
-            const last7Days = {};
-            for (let i = 6; i >= 0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
-                last7Days[d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})] = 0;
+            const datePoints = [];
+            const lastDaysData = {};
+
+            for (let i = 7; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                d.setHours(0, 0, 0, 0);
+                datePoints.push(d);
+                const dateKey = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                lastDaysData[dateKey] = 0;
             }
-            const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6); sevenDaysAgo.setHours(0,0,0,0);
-            expenses.filter(e => e.date >= sevenDaysAgo).forEach(e => {
-                const key = e.date.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
-                if (key in last7Days) last7Days[key] += e.value;
+
+            const firstDayInRange = datePoints[0];
+            expenses.filter(e => e.date >= firstDayInRange).forEach(e => {
+                const key = e.date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                if (key in lastDaysData) {
+                    lastDaysData[key] += e.value;
+                }
             });
-            const chartLabels = Object.keys(last7Days), chartData = Object.values(last7Days);
-            const total7Days = chartData.reduce((a, b) => a + b, 0);
-            const percentageData = chartData.map(value => total7Days > 0 ? (value / total7Days) * 100 : 0);
+            
+            const chartLabels = datePoints.map(d => {
+                const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                const weekdayStr = d.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
+                return [dateStr, weekdayStr.charAt(0).toUpperCase() + weekdayStr.slice(1)];
+            });
+
+            const chartData = datePoints.map(d => lastDaysData[d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })]);
+            
+            const totalRange = chartData.reduce((a, b) => a + b, 0);
+            const percentageData = chartData.map(value => totalRange > 0 ? (value / totalRange) * 100 : 0);
+            
             createChart('expenses-chart', 'bar', {
-                labels: chartLabels, datasets: [{ label: 'Gasto Diário (R$)', data: chartData, backgroundColor: 'rgba(79, 70, 229, 0.8)', yAxisID: 'y', order: 1 }, { label: '% do Total', data: percentageData, type: 'line', borderColor: 'rgb(255, 99, 132)', yAxisID: 'y1', order: 0, datalabels: { display: true, anchor: 'end', align: 'end', color: 'rgb(255, 99, 132)', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 4, padding: 4, font: { weight: 'bold' }, formatter: (v) => v > 0 ? v.toFixed(1) + '%' : '' } }]
-            }, { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { display: true, position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, y1: { display: false, position: 'right', grid: { drawOnChartArea: false } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { labels: { color: colors.textColor } }, datalabels: { display: (c) => c.dataset.type !== 'line', anchor: 'end', align: 'top', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '', color: colors.textColor, font: { weight: 'bold' } } } });
+                labels: chartLabels,
+                datasets: [
+                    { label: 'Gasto Diário (R$)', data: chartData, backgroundColor: 'rgba(79, 70, 229, 0.8)', yAxisID: 'y', order: 1 },
+                    { label: '% do Total', data: percentageData, type: 'line', borderColor: 'rgb(255, 99, 132)', yAxisID: 'y1', order: 0, datalabels: { display: true, anchor: 'end', align: 'end', color: 'rgb(255, 99, 132)', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 4, padding: 4, font: { weight: 'bold' }, formatter: (v) => v > 0 ? v.toFixed(1) + '%' : '' } }
+                ]
+            }, {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: { display: true, position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
+                    y1: { display: false, position: 'right', grid: { drawOnChartArea: false } },
+                    x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }
+                },
+                plugins: {
+                    legend: { labels: { color: colors.textColor } },
+                    datalabels: { display: (c) => c.dataset.type !== 'line', anchor: 'end', align: 'top', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '', color: colors.textColor, font: { weight: 'bold' } }
+                }
+            });
         }
 
         function updateMonthlyOrDailyChart(expenses) {
@@ -637,7 +754,7 @@
                 chartTitle = 'Gastos por Mês (Ano Atual)'; chartLabel = 'Gasto Mensal (R$)';
                 const monthlyTotals = Array(12).fill(0);
                 const currentYear = new Date().getFullYear();
-                expenses.filter(e => e.date.getFullYear() === currentYear).forEach(e => { monthlyTotals[e.date.getMonth()] += e.value; });
+                allExpenses.filter(e => e.date.getFullYear() === currentYear).forEach(e => { monthlyTotals[e.date.getMonth()] += e.value; });
                 chartData = monthlyTotals; chartLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
             } else {
                 const [year, month] = monthFilter.split('-').map(Number);
@@ -646,8 +763,12 @@
                 chartTitle = `Gastos por Dia (${monthName.charAt(0).toUpperCase() + monthName.slice(1)})`; chartLabel = 'Gasto Diário (R$)';
                 const daysInMonth = new Date(year, month, 0).getDate();
                 const dailyTotals = Array(daysInMonth).fill(0);
-                expenses.forEach(e => { dailyTotals[e.date.getDate() - 1] += e.value; });
-                chartData = dailyTotals; chartLabels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+                
+                expenses.forEach(e => { 
+                    dailyTotals[e.date.getDate() - 1] += e.value;
+                });
+                chartData = dailyTotals; 
+                chartLabels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
             }
             chartTitleEl.textContent = chartTitle;
             createChart('monthly-chart', 'bar', { labels: chartLabels, datasets: [{ label: chartLabel, data: chartData, backgroundColor: 'rgba(79, 70, 229, 0.8)' }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(v) : '', color: colors.textColor } } });
@@ -679,7 +800,8 @@
             const colors = getChartColors();
             const descriptionTotals = expenses.reduce((acc, exp) => { acc[exp.description] = (acc[exp.description] || 0) + exp.value; return acc; }, {});
             const sortedData = Object.entries(descriptionTotals).sort(([,a],[,b]) => b-a).slice(0, 10);
-            createChart('description-ranking-chart', 'bar', { labels: sortedData.map(i => i[0]), datasets: [{ label: 'Gasto (R$)', data: sortedData.map(i => i[1]), backgroundColor: 'rgba(22, 163, 74, 0.8)' }] }, { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, x: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '', color: colors.textColor } } });
+            const top10Total = sortedData.reduce((sum, [, value]) => sum + value, 0);
+            createChart('description-ranking-chart', 'bar', { labels: sortedData.map(i => i[0]), datasets: [{ label: 'Gasto (R$)', data: sortedData.map(i => i[1]), backgroundColor: 'rgba(22, 163, 74, 0.8)' }] }, { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, x: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', formatter: (value) => { const percentage = top10Total > 0 ? (value / top10Total) * 100 : 0; const currencyString = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value); const percentageString = `(${percentage.toFixed(1)}%)`; return [currencyString, percentageString]; }, color: colors.textColor, font: { size: 10 } } } });
         }
 
         // --- EVENT LISTENERS DINÂMICOS ---
