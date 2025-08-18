@@ -19,28 +19,31 @@
     <style>
         body { font-family: 'Inter', sans-serif; }
         .modal { transition: opacity 0.3s ease; }
+        /* Estilo para a barra de rolagem da tabela em modo escuro */
+        .dark .table-container::-webkit-scrollbar { height: 8px; }
+        .dark .table-container::-webkit-scrollbar-track { background: #374151; }
+        .dark .table-container::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        .dark .table-container::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        /* Animação do Spinner */
         .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            width: 36px;
-            height: 36px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
             border-radius: 50%;
-            border-left-color: #4f46e5;
-            animation: spin 1s ease infinite;
+            width: 1rem;
+            height: 1rem;
+            animation: spin 1s linear infinite;
         }
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900">
 
     <!-- Ecrã de Login -->
-    <section id="login-section" class="flex items-center justify-center h-screen bg-gray-200 dark:bg-gray-800">
-        <div class="w-full max-w-md bg-white dark:bg-gray-700 rounded-lg shadow-md p-8 relative">
-            <!-- Botão de Tema Adicionado -->
-            <button id="login-theme-toggle-btn" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg p-2 focus:outline-none"></button>
-            
+    <section id="login-section" class="flex items-center justify-center min-h-screen bg-gray-200 dark:bg-gray-800 p-4">
+        <div class="w-full max-w-md bg-white dark:bg-gray-700 rounded-lg shadow-md p-6 sm:p-8 relative">
+            <button id="login-theme-toggle-btn" class="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg p-2 focus:outline-none"></button>
             <h2 class="text-2xl font-bold text-center text-gray-800 dark:text-white mb-8">Login do Sistema</h2>
             <form id="login-form">
                 <div class="mb-4">
@@ -51,10 +54,14 @@
                     <label for="password" class="block text-gray-700 dark:text-gray-200 text-sm font-bold mb-2">Senha</label>
                     <input type="password" id="password" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 dark:text-gray-300 dark:bg-gray-600 dark:border-gray-500 mb-3 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
-                <div id="error-message" class="text-red-500 text-xs italic mb-4"></div>
-                <div class="flex items-center justify-between">
-                    <button id="login-btn" type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Entrar</button>
-                    <button id="register-btn" type="button" class="inline-block align-baseline font-bold text-sm text-indigo-500 hover:text-indigo-400">Registar Nova Conta</button>
+                <div id="error-message" class="text-red-500 text-xs italic mb-4 h-4"></div>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                    <button id="login-btn" type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center gap-2" disabled>
+                        <span class="spinner"></span> <span class="button-text hidden">Aguarde...</span>
+                    </button>
+                    <button id="register-btn" type="button" class="w-full sm:w-auto text-center inline-block align-baseline font-bold text-sm text-indigo-500 hover:text-indigo-400 flex items-center justify-center gap-2" disabled>
+                         <span class="spinner hidden"></span> <span class="button-text">Registar Nova Conta</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -62,147 +69,107 @@
 
     <!-- Sistema Principal (Oculto por padrão) -->
     <div id="app-section" class="hidden h-screen">
-        <div class="flex h-full">
-            <!-- Barra Lateral de Navegação -->
-            <aside id="sidebar" class="bg-gray-800 text-white flex flex-col transition-all duration-300">
-                <div class="h-16 flex items-center justify-center">
-                    <span id="sidebar-title" class="text-2xl font-bold transition-all duration-300 whitespace-nowrap">Meu Sistema</span>
-                </div>
+        <div class="flex h-full relative">
+            <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"></div>
+            <aside id="sidebar" class="bg-gray-800 text-white flex flex-col w-64 fixed md:relative inset-y-0 left-0 z-30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+                <div class="h-16 flex items-center justify-center"><span id="sidebar-title" class="text-2xl font-bold transition-all duration-300 whitespace-nowrap">Meu Sistema</span></div>
                 <nav class="flex-1 px-2 py-4 space-y-2">
-                    <a href="#" id="nav-gastos" class="nav-link flex items-center px-4 py-2 text-gray-100 bg-gray-900 rounded-md">
-                        <svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg>
-                        <span class="sidebar-text">Gastos</span>
-                    </a>
-                    <a href="#" id="nav-dashboard" class="nav-link flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md">
-                        <svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                        <span class="sidebar-text">Dashboard</span>
-                    </a>
+                    <a href="#" id="nav-gastos" class="nav-link flex items-center px-4 py-2 text-gray-100 bg-gray-900 rounded-md"><svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg><span class="sidebar-text">Gastos</span></a>
+                    <a href="#" id="nav-dashboard" class="nav-link flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md"><svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg><span class="sidebar-text">Dashboard</span></a>
                 </nav>
                 <div class="px-2 py-4">
-                    <button id="sidebar-toggle-btn" title="Minimizar barra lateral" class="w-full flex items-center justify-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md mb-2"></button>
-                    <div id="user-info" class="text-center text-sm text-gray-400 mb-2 sidebar-text"></div>
+                    <button id="sidebar-toggle-btn" title="Minimizar barra lateral" class="w-full hidden md:flex items-center justify-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md mb-2"></button>
+                    <div id="user-info" class="text-center text-sm text-gray-400 mb-2 sidebar-text break-all px-1"></div>
                     <button id="theme-toggle-btn" class="w-full flex items-center justify-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md mb-2"></button>
-                    <button id="logout-btn" class="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md">
-                        <svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                        <span class="sidebar-text">Sair</span>
-                    </button>
+                    <button id="logout-btn" class="w-full flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md"><svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg><span class="sidebar-text">Sair</span></button>
                 </div>
             </aside>
-
-            <!-- Conteúdo Principal -->
-            <main class="flex-1 p-10 overflow-y-auto">
-                <!-- Seção de Gastos -->
-                <section id="section-gastos" class="page-section">
-                    <!-- Cards de Resumo -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Gasto Hoje</h3><p id="summary-today" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Gasto Ontem</h3><p id="summary-yesterday" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Esta Semana</h3><p id="summary-week" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Este Mês</h3><p id="summary-month" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg></div><div><h3 class="text-gray-500 dark:text-gray-400">Média Diária</h3><p id="summary-avg-daily" class="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
-                    </div>
-                    <!-- Gráfico e Formulário -->
-                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                        <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Gastos nos Últimos 7 Dias</h2>
-                            <canvas id="expenses-chart"></canvas>
+            <div class="flex-1 flex flex-col">
+                <header class="md:hidden bg-white dark:bg-gray-800 shadow-sm p-4 flex justify-between items-center"><button id="mobile-menu-btn" class="text-gray-800 dark:text-white"><svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg></button><span class="text-xl font-bold text-gray-800 dark:text-white">Meu Sistema</span><div class="w-6"></div></header>
+                <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+                    <section id="section-gastos" class="page-section">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Gasto Hoje</h3><p id="summary-today" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Gasto Ontem</h3><p id="summary-yesterday" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Esta Semana</h3><p id="summary-week" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Este Mês</h3><p id="summary-month" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Média Diária</h3><p id="summary-avg-daily" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
                         </div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Lançar Gasto</h2>
-                            <form id="expense-form">
-                                <input type="hidden" id="expenseId">
-                                <div class="space-y-4">
-                                    <input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                    <input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                    <input type="datetime-local" id="expenseDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                    <input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                    <select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><option>Crédito</option><option>Dinheiro</option><option>Débito</option><option>Pix</option><option>VA</option></select>
-                                    <div class="flex items-center space-x-2">
-                                        <select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
-                                        <button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button>
-                                    </div>
-                                    <button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button>
-                                    <button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button>
-                                </div>
-                            </form>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Gastos nos Últimos 7 Dias</h2><div class="h-80 relative"><canvas id="expenses-chart"></canvas></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Lançar Gasto</h2><form id="expense-form"><input type="hidden" id="expenseId"><div class="space-y-4"><input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><input type="datetime-local" id="expenseDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><option>Crédito</option><option>Dinheiro</option><option>Débito</option><option>Pix</option><option>VA</option></select><div class="flex items-center space-x-2"><select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select><button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button></div><button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button><button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button></div></form></div>
                         </div>
-                    </div>
-                    <!-- Filtros e Tabela de Gastos -->
-                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                        <div class="p-4 flex flex-col sm:flex-row flex-wrap items-center gap-4 dark:text-white">
-                            <h3 class="text-lg font-semibold w-full sm:w-auto">Lançamentos</h3>
-                            <div class="flex-grow"></div>
-                            <input type="search" id="filter-description" placeholder="Pesquisar descrição..." class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
-                            <select id="filter-category" class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600"></select>
-                            <select id="filter-payment" class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600"></select>
-                            <button id="clear-filters-btn" class="w-full sm:w-auto bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500">Limpar</button>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
+                            <div class="p-4 flex flex-col sm:flex-row flex-wrap items-center gap-4 dark:text-white">
+                                <h3 class="text-lg font-semibold w-full sm:w-auto">Lançamentos</h3>
+                                <div class="flex-grow"></div>
+                                <input type="search" id="filter-description" placeholder="Pesquisar descrição..." class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600">
+                                <select id="filter-category" class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600"></select>
+                                <select id="filter-payment" class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600"></select>
+                                <input type="date" id="filter-date" class="w-full sm:w-auto p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300">
+                                <button id="clear-filters-btn" class="w-full sm:w-auto bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500">Limpar</button>
+                            </div>
+                            <div class="overflow-x-auto table-container">
+                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="expenses-table">
+                                    <thead class="bg-gray-50 dark:bg-gray-700">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Data</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Descrição</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Categoria</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Pagamento</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Valor</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="expenses-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
+                                </table>
+                            </div>
                         </div>
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700" id="expenses-table">
-                            <thead class="bg-gray-50 dark:bg-gray-700">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Data</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Descrição</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Categoria</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Pagamento</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Valor</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="expenses-body" class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700"></tbody>
-                        </table>
-                    </div>
-                </section>
-                
-                <!-- Seção de Dashboard -->
-                <section id="section-dashboard" class="page-section hidden">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
-                         <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-0">Dashboard de Análises</h1>
-                         <div class="flex items-center space-x-2">
-                            <label for="dashboard-month-filter" class="text-gray-600 dark:text-gray-300">Mês:</label>
-                            <select id="dashboard-month-filter" class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600"></select>
-                         </div>
-                    </div>
-                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div id="monthly-chart-container" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h2 id="monthly-chart-title" class="text-xl font-bold mb-4 text-gray-800 dark:text-white"></h2>
-                            <canvas id="monthly-chart"></canvas>
+                    </section>
+                    <section id="section-dashboard" class="page-section hidden">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                            <h1 class="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white">Dashboard de Análises</h1>
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+                                <label for="dashboard-month-filter" class="text-gray-600 dark:text-gray-300 sm:hidden">Filtrar por:</label>
+                                <select id="dashboard-month-filter" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600" title="Filtro por Mês"></select>
+                                <input type="date" id="dashboard-date-filter" class="w-full p-2 border rounded bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300" title="Filtro por Dia">
+                                <button id="clear-dashboard-filters-btn" class="w-full sm:w-auto bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200 p-2 rounded hover:bg-gray-300 dark:hover:bg-gray-500">Limpar</button>
+                            </div>
                         </div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Pareto de Gastos por Categoria</h2>
-                            <canvas id="category-pareto-chart"></canvas>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 id="monthly-chart-title" class="text-xl font-bold mb-4 text-gray-800 dark:text-white"></h2><div class="h-80 relative"><canvas id="monthly-chart"></canvas></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Pareto de Gastos por Categoria</h2><div class="h-80 relative"><canvas id="category-pareto-chart"></canvas></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Pareto de Gastos por Dia da Semana</h2><div class="h-80 relative"><canvas id="weekday-pareto-chart"></canvas></div></div>
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Ranking de Gastos por Descrição</h2><div class="h-96 relative"><canvas id="description-ranking-chart"></canvas></div></div>
                         </div>
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Pareto de Gastos por Dia da Semana</h2>
-                            <canvas id="weekday-pareto-chart"></canvas>
-                        </div>
-                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-                            <h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Ranking de Gastos por Descrição</h2>
-                            <canvas id="description-ranking-chart"></canvas>
-                        </div>
-                     </div>
-                </section>
-            </main>
+                    </section>
+                </main>
+            </div>
         </div>
     </div>
 
     <!-- Modal de Categorias -->
-    <div id="category-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden opacity-0">
-        <div class="bg-white dark:bg-gray-700 rounded-lg shadow-xl p-8 w-full max-w-md">
-            <h2 class="text-2xl font-bold mb-6 dark:text-white">Gerir Categorias</h2>
-            <form id="add-category-form" class="flex items-center space-x-2 mb-4">
-                <input type="text" id="newCategoryName" placeholder="Nova categoria" class="w-full p-2 border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" required>
-                <button type="submit" class="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Adicionar</button>
-            </form>
-            <div id="category-list" class="space-y-2 max-h-60 overflow-y-auto"></div>
-            <button id="close-category-modal-btn" class="mt-6 w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600">Fechar</button>
+    <div id="category-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden opacity-0 p-4 z-40">
+        <div class="bg-white dark:bg-gray-700 rounded-lg shadow-xl p-6 sm:p-8 w-full max-w-md"><h2 class="text-2xl font-bold mb-6 dark:text-white">Gerir Categorias</h2><form id="add-category-form" class="flex items-center space-x-2 mb-4"><input type="text" id="newCategoryName" placeholder="Nova categoria" class="w-full p-2 border rounded dark:bg-gray-600 dark:border-gray-500 dark:text-white" required><button type="submit" class="bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Adicionar</button></form><div id="category-list" class="space-y-2 max-h-60 overflow-y-auto"></div><button id="close-category-modal-btn" class="mt-6 w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600">Fechar</button></div>
+    </div>
+    
+    <!-- Modal de Confirmação -->
+    <div id="confirmation-modal" class="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden opacity-0 p-4 z-50">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 sm:p-8 w-full max-w-sm">
+            <h2 id="confirmation-title" class="text-lg font-bold mb-4 text-gray-900 dark:text-white">Confirmar Ação</h2>
+            <p id="confirmation-message" class="text-gray-600 dark:text-gray-300 mb-6">Tem certeza de que deseja prosseguir?</p>
+            <div class="flex justify-end gap-4">
+                <button id="confirm-cancel-btn" class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500">Cancelar</button>
+                <button id="confirm-action-btn" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Confirmar</button>
+            </div>
         </div>
     </div>
 
     <!-- Firebase SDK -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc, doc, updateDoc, deleteDoc, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-firestore.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.3/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAL8d8aHshkzIhkGOr6gQD8LlkwxcOqOGY",
@@ -222,6 +189,7 @@
         const appSection = document.getElementById('app-section');
         const userInfo = document.getElementById('user-info');
         const errorMessage = document.getElementById('error-message');
+        const loginForm = document.getElementById('login-form');
         const expenseForm = document.getElementById('expense-form');
         const expensesBody = document.getElementById('expenses-body');
         const categoryModal = document.getElementById('category-modal');
@@ -231,7 +199,9 @@
         const filterDescription = document.getElementById('filter-description');
         const filterCategorySelect = document.getElementById('filter-category');
         const filterPaymentSelect = document.getElementById('filter-payment');
+        const filterDate = document.getElementById('filter-date');
         const dashboardMonthFilter = document.getElementById('dashboard-month-filter');
+        const dashboardDateFilter = document.getElementById('dashboard-date-filter');
         const loginThemeToggleButton = document.getElementById('login-theme-toggle-btn');
         const themeToggleButton = document.getElementById('theme-toggle-btn');
         const sidebar = document.getElementById('sidebar');
@@ -240,11 +210,47 @@
         const sidebarTitle = document.getElementById('sidebar-title');
         const navLinks = document.querySelectorAll('.nav-link');
         const logoutBtn = document.getElementById('logout-btn');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
         
         let unsubscribeExpenses = null;
         let unsubscribeCategories = null;
         let activeCharts = {};
-        let allExpenses = []; // Array para guardar os gastos localmente
+        let allExpenses = [];
+
+        // --- LÓGICA DO MODAL DE CONFIRMAÇÃO ---
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmActionBtn = document.getElementById('confirm-action-btn');
+        const confirmCancelBtn = document.getElementById('confirm-cancel-btn');
+        const confirmationMessage = document.getElementById('confirmation-message');
+        
+        let resolveConfirmation;
+
+        function showConfirmationModal(message) {
+            confirmationMessage.textContent = message;
+            confirmationModal.classList.remove('hidden');
+            setTimeout(() => confirmationModal.classList.remove('opacity-0'), 10);
+            return new Promise(resolve => {
+                resolveConfirmation = resolve;
+            });
+        }
+
+        function hideConfirmationModal() {
+            confirmationModal.classList.add('opacity-0');
+            setTimeout(() => confirmationModal.classList.add('hidden'), 300);
+        }
+
+        confirmActionBtn.addEventListener('click', () => {
+            hideConfirmationModal();
+            if (resolveConfirmation) resolveConfirmation(true);
+        });
+
+        confirmCancelBtn.addEventListener('click', () => {
+            hideConfirmationModal();
+            if (resolveConfirmation) resolveConfirmation(false);
+        });
 
         // --- LÓGICA DA BARRA LATERAL (SIDEBAR) ---
         const collapseIcon = `<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7" /></svg>`;
@@ -252,40 +258,31 @@
 
         function setSidebarState(isCollapsed) {
             if (isCollapsed) {
-                sidebar.classList.remove('w-64');
-                sidebar.classList.add('w-20');
+                sidebar.classList.remove('w-64'); sidebar.classList.add('w-20');
                 sidebarTitle.classList.add('opacity-0', 'invisible');
                 sidebarTexts.forEach(text => text.classList.add('hidden'));
-                navLinks.forEach(link => {
-                    link.classList.add('justify-center');
-                    link.querySelector('.mr-3').classList.add('mr-0');
-                });
-                logoutBtn.classList.add('justify-center');
-                logoutBtn.querySelector('.mr-3').classList.add('mr-0');
-
-                sidebarToggleBtn.innerHTML = expandIcon;
-                sidebarToggleBtn.title = "Expandir barra lateral";
+                navLinks.forEach(link => { link.classList.add('justify-center'); link.querySelector('.mr-3').classList.add('mr-0'); });
+                logoutBtn.classList.add('justify-center'); logoutBtn.querySelector('.mr-3').classList.add('mr-0');
+                sidebarToggleBtn.innerHTML = expandIcon; sidebarToggleBtn.title = "Expandir barra lateral";
             } else {
-                sidebar.classList.add('w-64');
-                sidebar.classList.remove('w-20');
+                sidebar.classList.add('w-64'); sidebar.classList.remove('w-20');
                 sidebarTitle.classList.remove('opacity-0', 'invisible');
                 sidebarTexts.forEach(text => text.classList.remove('hidden'));
-                navLinks.forEach(link => {
-                    link.classList.remove('justify-center');
-                    link.querySelector('svg').classList.remove('mr-0');
-                });
-                logoutBtn.classList.remove('justify-center');
-                logoutBtn.querySelector('svg').classList.remove('mr-0');
-                
-                sidebarToggleBtn.innerHTML = collapseIcon;
-                sidebarToggleBtn.title = "Minimizar barra lateral";
+                navLinks.forEach(link => { link.classList.remove('justify-center'); link.querySelector('svg').classList.remove('mr-0'); });
+                logoutBtn.classList.remove('justify-center'); logoutBtn.querySelector('svg').classList.remove('mr-0');
+                sidebarToggleBtn.innerHTML = collapseIcon; sidebarToggleBtn.title = "Minimizar barra lateral";
             }
         }
 
-        function toggleSidebar() {
+        function toggleDesktopSidebar() {
             const isCollapsed = sidebar.classList.contains('w-20');
             setSidebarState(!isCollapsed);
             localStorage.setItem('sidebarCollapsed', !isCollapsed);
+        }
+        
+        function toggleMobileSidebar() {
+            sidebar.classList.toggle('-translate-x-full');
+            sidebarOverlay.classList.toggle('hidden');
         }
 
         function initializeSidebar() {
@@ -293,9 +290,9 @@
             setSidebarState(isCollapsed);
         }
 
-        if (sidebarToggleBtn) {
-            sidebarToggleBtn.addEventListener('click', toggleSidebar);
-        }
+        if (sidebarToggleBtn) sidebarToggleBtn.addEventListener('click', toggleDesktopSidebar);
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleMobileSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', toggleMobileSidebar);
         
         // --- LÓGICA DE TEMA (DARK/LIGHT MODE) ---
         const sunIconOnly = `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>`;
@@ -304,12 +301,14 @@
         function applyTheme(theme) {
             if (theme === 'dark') {
                 document.documentElement.classList.add('dark');
-                themeToggleButton.innerHTML = sunIconOnly;
-                loginThemeToggleButton.innerHTML = sunIconOnly;
+                themeToggleButton.innerHTML = sunIconOnly; loginThemeToggleButton.innerHTML = sunIconOnly;
+                filterDate.style.colorScheme = 'dark';
+                dashboardDateFilter.style.colorScheme = 'dark';
             } else {
                 document.documentElement.classList.remove('dark');
-                themeToggleButton.innerHTML = moonIconOnly;
-                loginThemeToggleButton.innerHTML = moonIconOnly;
+                themeToggleButton.innerHTML = moonIconOnly; loginThemeToggleButton.innerHTML = moonIconOnly;
+                filterDate.style.colorScheme = 'light';
+                dashboardDateFilter.style.colorScheme = 'light';
             }
             localStorage.setItem('theme', theme);
             if (auth.currentUser && typeof applyFiltersAndRender === 'function') {
@@ -319,8 +318,7 @@
 
         function toggleTheme() {
             const isDark = document.documentElement.classList.contains('dark');
-            const newTheme = isDark ? 'light' : 'dark';
-            applyTheme(newTheme);
+            applyTheme(isDark ? 'light' : 'dark');
         }
 
         function initializeTheme() {
@@ -332,14 +330,26 @@
         if (themeToggleButton) themeToggleButton.addEventListener('click', toggleTheme);
         if (loginThemeToggleButton) loginThemeToggleButton.addEventListener('click', toggleTheme);
         
-        // --- INICIALIZAÇÃO GERAL ---
         document.addEventListener('DOMContentLoaded', () => {
             initializeTheme();
             initializeSidebar();
         });
 
-
         // --- LÓGICA DE AUTENTICAÇÃO ---
+        function toggleButtonLoading(button, isLoading, text = '') {
+            const spinner = button.querySelector('.spinner');
+            const buttonText = button.querySelector('.button-text');
+            button.disabled = isLoading;
+            if (isLoading) {
+                spinner.classList.remove('hidden');
+                buttonText.classList.add('hidden');
+            } else {
+                spinner.classList.add('hidden');
+                buttonText.textContent = text;
+                buttonText.classList.remove('hidden');
+            }
+        }
+        
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginSection.classList.add('hidden');
@@ -351,50 +361,32 @@
                 appSection.classList.add('hidden');
                 loginSection.classList.remove('hidden');
                 userInfo.textContent = '';
+                toggleButtonLoading(loginBtn, false, 'Entrar');
+                toggleButtonLoading(registerBtn, false, 'Registar Nova Conta');
+                registerBtn.disabled = false;
                 stopAppListeners();
             }
         });
 
-        // --- CONFIGURAÇÃO INICIAL DE DADOS ---
         async function setupInitialData(uid) {
             const categoriesQuery = query(collection(db, "categories"), where("uid", "==", uid));
             const querySnapshot = await getDocs(categoriesQuery);
-
             if (querySnapshot.empty) {
-                const defaultCategories = [
-                    'Alimentação', 'Educação', 'Farmácia', 'Lazer', 'Lojas', 
-                    'Mercado', 'Moradia', 'Outros', 'Saúde', 'Transporte'
-                ];
-                
-                const categoryPromises = defaultCategories.map(catName => {
-                    return addDoc(collection(db, "categories"), { name: catName, uid: uid });
-                });
-                
-                await Promise.all(categoryPromises);
+                const defaultCategories = ['Alimentação', 'Educação', 'Farmácia', 'Lazer', 'Lojas', 'Mercado', 'Moradia', 'Outros', 'Saúde', 'Transporte'];
+                await Promise.all(defaultCategories.map(catName => addDoc(collection(db, "categories"), { name: catName, uid: uid })));
             }
         }
 
-        // --- INICIALIZAÇÃO E PARAGEM DOS LISTENERS ---
         function startAppListeners(uid) {
             const categoriesQuery = query(collection(db, "categories"), where("uid", "==", uid));
             unsubscribeCategories = onSnapshot(categoriesQuery, (snapshot) => {
-                const categories = [];
-                snapshot.forEach(doc => categories.push({ id: doc.id, ...doc.data() }));
+                const categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 updateCategoryUI(categories);
             });
 
             const expensesQuery = query(collection(db, "expenses"), where("uid", "==", uid));
             unsubscribeExpenses = onSnapshot(expensesQuery, (snapshot) => {
-                const expenses = [];
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    if (data.date && typeof data.date.toDate === 'function') {
-                        expenses.push({ id: doc.id, ...data, date: data.date.toDate() });
-                    }
-                });
-                
-                expenses.sort((a, b) => b.date - a.date);
-                allExpenses = expenses;
+                allExpenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), date: doc.data().date.toDate() })).sort((a, b) => b.date - a.date);
                 updateDashboardMonthFilter(allExpenses);
                 applyFiltersAndRender();
             });
@@ -410,72 +402,71 @@
             const descriptionFilter = filterDescription.value.toLowerCase().trim();
             const categoryFilter = filterCategorySelect.value;
             const paymentFilter = filterPaymentSelect.value;
+            const dateFilterValue = filterDate.value;
 
-            let filteredExpenses = allExpenses;
-
-            if (descriptionFilter) {
-                filteredExpenses = filteredExpenses.filter(exp => exp.description.toLowerCase().includes(descriptionFilter));
-            }
-            if (categoryFilter !== 'all') {
-                filteredExpenses = filteredExpenses.filter(exp => exp.category === categoryFilter);
-            }
-            if (paymentFilter !== 'all') {
-                filteredExpenses = filteredExpenses.filter(exp => exp.paymentMethod === paymentFilter);
-            }
+            let filteredExpenses = allExpenses.filter(exp => {
+                const matchDate = !dateFilterValue || exp.date.toISOString().startsWith(dateFilterValue);
+                const matchDescription = !descriptionFilter || exp.description.toLowerCase().includes(descriptionFilter);
+                const matchCategory = categoryFilter === 'all' || exp.category === categoryFilter;
+                const matchPayment = paymentFilter === 'all' || exp.paymentMethod === paymentFilter;
+                return matchDate && matchDescription && matchCategory && matchPayment;
+            });
             
-            updateDashboardSummaries(allExpenses); // Summaries should reflect all data, not filtered
+            updateDashboardSummaries(filteredExpenses);
             updateExpensesTable(filteredExpenses);
 
-            // Filtros da página de Dashboard
             const monthFilter = dashboardMonthFilter.value;
+            const dashboardDateValue = dashboardDateFilter.value;
             let dashboardExpenses = allExpenses;
 
-            if (monthFilter !== 'all') {
+            if (dashboardDateValue) {
+                dashboardExpenses = allExpenses.filter(exp => exp.date.toISOString().startsWith(dashboardDateValue));
+            } else if (monthFilter !== 'all') {
                 const [year, month] = monthFilter.split('-').map(Number);
-                 dashboardExpenses = dashboardExpenses.filter(exp => {
-                    return exp.date.getFullYear() === year && exp.date.getMonth() === month - 1;
-                });
+                dashboardExpenses = allExpenses.filter(exp => exp.date.getFullYear() === year && exp.date.getMonth() === month - 1);
             }
             
-            // Atualiza UI da página de Dashboard
-            updateAllCharts(dashboardExpenses, filteredExpenses); // Pass both total and filtered for different charts
+            updateAllCharts(dashboardExpenses, filteredExpenses);
         }
 
-        filterDescription.addEventListener('input', applyFiltersAndRender);
-        filterCategorySelect.addEventListener('change', applyFiltersAndRender);
-        filterPaymentSelect.addEventListener('change', applyFiltersAndRender);
-        dashboardMonthFilter.addEventListener('change', applyFiltersAndRender);
-
+        [filterDescription, filterCategorySelect, filterPaymentSelect, filterDate, dashboardMonthFilter, dashboardDateFilter].forEach(el => el.addEventListener('input', applyFiltersAndRender));
+        
         document.getElementById('clear-filters-btn').addEventListener('click', () => {
             filterDescription.value = '';
             filterCategorySelect.value = 'all';
             filterPaymentSelect.value = 'all';
+            filterDate.value = '';
+            applyFiltersAndRender();
+        });
+
+        document.getElementById('clear-dashboard-filters-btn').addEventListener('click', () => {
+            dashboardMonthFilter.value = 'all';
+            dashboardDateFilter.value = '';
+            applyFiltersAndRender();
+        });
+
+        dashboardDateFilter.addEventListener('input', () => {
+            if (dashboardDateFilter.value) dashboardMonthFilter.value = 'all';
+            applyFiltersAndRender();
+        });
+
+        dashboardMonthFilter.addEventListener('input', () => {
+            if (dashboardMonthFilter.value !== 'all') dashboardDateFilter.value = '';
             applyFiltersAndRender();
         });
 
         function updateDashboardMonthFilter(expenses) {
-            const monthSet = new Set();
-            expenses.forEach(exp => {
-                const year = exp.date.getFullYear();
-                const month = exp.date.getMonth() + 1;
-                monthSet.add(`${year}-${String(month).padStart(2, '0')}`);
-            });
-
+            const monthSet = new Set(expenses.map(exp => `${exp.date.getFullYear()}-${String(exp.date.getMonth() + 1).padStart(2, '0')}`));
             const sortedMonths = Array.from(monthSet).sort().reverse();
-
-            dashboardMonthFilter.innerHTML = '<option value="all">Ano Inteiro</option>';
+            dashboardMonthFilter.innerHTML = '<option value="all">Mês Inteiro</option>';
             sortedMonths.forEach(monthStr => {
                 const [year, month] = monthStr.split('-');
                 const date = new Date(year, month - 1, 1);
                 const optionText = date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-                
-                const option = document.createElement('option');
-                option.value = `${year}-${month}`;
-                option.textContent = optionText.charAt(0).toUpperCase() + optionText.slice(1);
+                const option = new Option(optionText.charAt(0).toUpperCase() + optionText.slice(1), `${year}-${month}`);
                 dashboardMonthFilter.appendChild(option);
             });
         }
-
 
         // --- LÓGICA DE GASTOS ---
         expenseForm.addEventListener('submit', async (e) => {
@@ -490,18 +481,11 @@
                 category: document.getElementById('expenseCategory').value,
                 uid: auth.currentUser.uid
             };
-
             try {
-                if (id) {
-                    await updateDoc(doc(db, "expenses", id), expenseData);
-                } else {
-                    await addDoc(collection(db, "expenses"), expenseData);
-                }
+                if (id) await updateDoc(doc(db, "expenses", id), expenseData);
+                else await addDoc(collection(db, "expenses"), expenseData);
                 resetExpenseForm();
-            } catch (error) {
-                console.error("Erro ao salvar gasto:", error);
-                alert("Ocorreu um erro ao salvar o gasto.");
-            }
+            } catch (error) { console.error("Erro ao salvar gasto:", error); }
         });
         
         function resetExpenseForm() {
@@ -509,7 +493,6 @@
             document.getElementById('expenseId').value = '';
             document.getElementById('cancel-expense-edit-btn').classList.add('hidden');
         }
-
         document.getElementById('cancel-expense-edit-btn').addEventListener('click', resetExpenseForm);
 
         // --- LÓGICA DE CATEGORIAS ---
@@ -517,10 +500,7 @@
             e.preventDefault();
             const newCategoryName = document.getElementById('newCategoryName').value.trim();
             if (newCategoryName) {
-                await addDoc(collection(db, "categories"), {
-                    name: newCategoryName,
-                    uid: auth.currentUser.uid
-                });
+                await addDoc(collection(db, "categories"), { name: newCategoryName, uid: auth.currentUser.uid });
                 addCategoryForm.reset();
             }
         });
@@ -530,63 +510,48 @@
             categoryList.innerHTML = '';
             expenseCategorySelect.innerHTML = '';
             filterCategorySelect.innerHTML = '<option value="all">Todas as Categorias</option>';
-
             categories.sort((a, b) => a.name.localeCompare(b.name)).forEach(cat => {
                 const div = document.createElement('div');
                 div.className = 'flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-600 rounded';
-                div.innerHTML = `<span class="dark:text-gray-200">${cat.name}</span><button data-id="${cat.id}" class="delete-category-btn text-red-500 hover:text-red-700">Excluir</button>`;
+                div.innerHTML = `<span class="dark:text-gray-200">${cat.name}</span><button data-id="${cat.id}" class="delete-category-btn text-red-500 hover:text-red-700 font-semibold">Excluir</button>`;
                 categoryList.appendChild(div);
-                
-                const option = document.createElement('option');
-                option.value = cat.name;
-                option.textContent = cat.name;
+                const option = new Option(cat.name, cat.name);
                 expenseCategorySelect.appendChild(option.cloneNode(true));
                 filterCategorySelect.appendChild(option);
             });
-            
             filterPaymentSelect.innerHTML = '<option value="all">Todas as Formas</option>';
-            ['Crédito', 'Dinheiro', 'Débito', 'Pix', 'VA'].forEach(method => {
-                const option = document.createElement('option');
-                option.value = method;
-                option.textContent = method;
-                filterPaymentSelect.appendChild(option);
-            });
+            ['Crédito', 'Dinheiro', 'Débito', 'Pix', 'VA'].forEach(method => filterPaymentSelect.appendChild(new Option(method, method)));
         }
         
         function updateExpensesTable(expenses) {
-            expensesBody.innerHTML = '';
-            if (expenses.length === 0) {
-                expensesBody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Nenhum gasto encontrado para os filtros selecionados.</td></tr>`;
-                return;
-            }
-            expenses.forEach(exp => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${exp.date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${exp.description}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${exp.category}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${exp.paymentMethod}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(exp.value)}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                        <button class="edit-expense-btn text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" data-id="${exp.id}">Editar</button>
-                        <button class="delete-expense-btn text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" data-id="${exp.id}">Excluir</button>
-                    </td>
-                `;
-                expensesBody.appendChild(row);
-            });
+            expensesBody.innerHTML = expenses.length === 0 
+                ? `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">Nenhum gasto encontrado.</td></tr>`
+                : expenses.map(exp => `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">${exp.date.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">${exp.description}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${exp.category}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">${exp.paymentMethod}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 dark:text-gray-200">${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(exp.value)}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                            <button class="edit-expense-btn text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300" data-id="${exp.id}">Editar</button>
+                            <button class="delete-expense-btn text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300" data-id="${exp.id}">Excluir</button>
+                        </td>
+                    </tr>`).join('');
         }
         
         Chart.register(ChartDataLabels);
 
-        function updateDashboardSummaries(expenses) {
+        function updateDashboardSummaries(filteredExpenses) {
             const now = new Date();
             const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const yesterdayStart = new Date(new Date().setDate(todayStart.getDate() - 1));
+            const tomorrowStart = new Date(todayStart);
+            tomorrowStart.setDate(todayStart.getDate() + 1);
+            const yesterdayStart = new Date(todayStart);
+            yesterdayStart.setDate(todayStart.getDate() - 1);
             
             const weekStart = new Date(now);
-            const dayOfWeek = weekStart.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-            const diff = weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust for Sunday to make Monday the first day
-            weekStart.setDate(diff);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay() + (weekStart.getDay() === 0 ? -6 : 1));
             weekStart.setHours(0, 0, 0, 0);
 
             const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -594,31 +559,26 @@
             const sum = (arr) => arr.reduce((acc, item) => acc + item.value, 0);
             const formatCurrency = (val) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val || 0);
             
-            const monthExpenses = expenses.filter(e => e.date >= monthStart);
-            const totalMonth = sum(monthExpenses);
-            const dayOfMonth = now.getDate();
-            const dailyAverage = totalMonth > 0 ? totalMonth / dayOfMonth : 0;
-
-            document.getElementById('summary-today').textContent = formatCurrency(sum(expenses.filter(e => e.date >= todayStart)));
-            document.getElementById('summary-yesterday').textContent = formatCurrency(sum(expenses.filter(e => e.date >= yesterdayStart && e.date < todayStart)));
-            document.getElementById('summary-week').textContent = formatCurrency(sum(expenses.filter(e => e.date >= weekStart)));
-            document.getElementById('summary-month').textContent = formatCurrency(totalMonth);
+            document.getElementById('summary-today').textContent = formatCurrency(sum(filteredExpenses.filter(e => e.date >= todayStart && e.date < tomorrowStart)));
+            document.getElementById('summary-yesterday').textContent = formatCurrency(sum(filteredExpenses.filter(e => e.date >= yesterdayStart && e.date < todayStart)));
+            document.getElementById('summary-week').textContent = formatCurrency(sum(filteredExpenses.filter(e => e.date >= weekStart)));
+            document.getElementById('summary-month').textContent = formatCurrency(sum(filteredExpenses.filter(e => e.date >= monthStart)));
+            
+            const allMonthExpenses = allExpenses.filter(e => e.date >= monthStart);
+            const totalMonth = sum(allMonthExpenses);
+            const dailyAverage = totalMonth > 0 ? totalMonth / now.getDate() : 0;
             document.getElementById('summary-avg-daily').textContent = formatCurrency(dailyAverage);
         }
         
         function destroyAllCharts() {
-            Object.values(activeCharts).forEach(chart => {
-                if (chart) chart.destroy();
-            });
+            Object.values(activeCharts).forEach(chart => chart?.destroy());
             activeCharts = {};
         }
 
         function updateAllCharts(dashboardExpenses, gastosFilteredExpenses) {
             destroyAllCharts();
-            const monthFilter = dashboardMonthFilter.value;
-            
-            update7DayChart(gastosFilteredExpenses); // Gráfico de Gastos usa dados filtrados da página de gastos
-            updateMonthlyOrDailyChart(dashboardExpenses, monthFilter); // Gráficos do Dashboard usam dados filtrados pelo mês
+            update7DayChart(gastosFilteredExpenses);
+            updateMonthlyOrDailyChart(dashboardExpenses);
             updateCategoryParetoChart(dashboardExpenses);
             updateWeekdayParetoChart(dashboardExpenses);
             updateDescriptionRankingChart(dashboardExpenses);
@@ -632,290 +592,112 @@
             };
         }
 
+        function createChart(canvasId, type, data, options) {
+            const ctx = document.getElementById(canvasId)?.getContext('2d');
+            if (ctx) {
+                activeCharts[canvasId] = new Chart(ctx, { type, data, options });
+            }
+        }
+
         function update7DayChart(expenses) {
             const colors = getChartColors();
             const last7Days = {};
             for (let i = 6; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                d.setHours(0,0,0,0);
+                const d = new Date(); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
                 last7Days[d.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'})] = 0;
             }
-            
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-            sevenDaysAgo.setHours(0,0,0,0);
-
-            const relevantExpenses = expenses.filter(e => e.date >= sevenDaysAgo);
-
-            relevantExpenses.forEach(e => {
+            const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6); sevenDaysAgo.setHours(0,0,0,0);
+            expenses.filter(e => e.date >= sevenDaysAgo).forEach(e => {
                 const key = e.date.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
-                if (key in last7Days) {
-                    last7Days[key] += e.value;
-                }
+                if (key in last7Days) last7Days[key] += e.value;
             });
-            const chartLabels = Object.keys(last7Days);
-            const chartData = Object.values(last7Days);
-            
+            const chartLabels = Object.keys(last7Days), chartData = Object.values(last7Days);
             const total7Days = chartData.reduce((a, b) => a + b, 0);
             const percentageData = chartData.map(value => total7Days > 0 ? (value / total7Days) * 100 : 0);
-
-            const ctx = document.getElementById('expenses-chart').getContext('2d');
-            activeCharts['7day'] = new Chart(ctx, {
-                type: 'bar',
-                data: { 
-                    labels: chartLabels, 
-                    datasets: [
-                        { 
-                            label: 'Gasto Diário (R$)', 
-                            data: chartData, 
-                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                            yAxisID: 'y',
-                            order: 1 // Barra fica atrás
-                        },
-                        {
-                            label: '% do Total',
-                            data: percentageData,
-                            type: 'line',
-                            borderColor: 'rgb(255, 99, 132)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                            yAxisID: 'y1',
-                            order: 0, // Linha fica na frente
-                            datalabels: {
-                                display: true,
-                                anchor: 'end',
-                                align: 'end',
-                                color: 'rgb(255, 99, 132)',
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                borderRadius: 4,
-                                padding: 4,
-                                font: { weight: 'bold' },
-                                formatter: (value) => value > 0 ? value.toFixed(1) + '%' : '',
-                            }
-                        }
-                    ] 
-                },
-                options: {
-                    responsive: true,
-                    interaction: { mode: 'index', intersect: false },
-                    scales: { 
-                        y: { type: 'linear', display: true, position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
-                        y1: { type: 'linear', display: false, position: 'right', grid: { drawOnChartArea: false } },
-                        x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }
-                    },
-                    plugins: {
-                        legend: { labels: { color: colors.textColor } },
-                        datalabels: {
-                            display: (context) => context.dataset.type !== 'line',
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: (value) => value > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : '',
-                            color: colors.textColor,
-                            font: { weight: 'bold' }
-                        }
-                    }
-                }
-            });
+            createChart('expenses-chart', 'bar', {
+                labels: chartLabels, datasets: [{ label: 'Gasto Diário (R$)', data: chartData, backgroundColor: 'rgba(79, 70, 229, 0.8)', yAxisID: 'y', order: 1 }, { label: '% do Total', data: percentageData, type: 'line', borderColor: 'rgb(255, 99, 132)', yAxisID: 'y1', order: 0, datalabels: { display: true, anchor: 'end', align: 'end', color: 'rgb(255, 99, 132)', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 4, padding: 4, font: { weight: 'bold' }, formatter: (v) => v > 0 ? v.toFixed(1) + '%' : '' } }]
+            }, { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { display: true, position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, y1: { display: false, position: 'right', grid: { drawOnChartArea: false } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { labels: { color: colors.textColor } }, datalabels: { display: (c) => c.dataset.type !== 'line', anchor: 'end', align: 'top', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '', color: colors.textColor, font: { weight: 'bold' } } } });
         }
 
-        function updateMonthlyOrDailyChart(expenses, monthFilter) {
+        function updateMonthlyOrDailyChart(expenses) {
             const colors = getChartColors();
             const chartTitleEl = document.getElementById('monthly-chart-title');
+            const monthFilter = dashboardMonthFilter.value;
+            const dateFilter = dashboardDateFilter.value;
             let chartData, chartLabels, chartTitle, chartLabel;
 
-            if (monthFilter === 'all') {
-                chartTitle = 'Gastos por Mês (Ano Atual)';
-                chartLabel = 'Gasto Mensal (R$)';
+            if (dateFilter) {
+                const date = new Date(dateFilter + 'T00:00:00');
+                chartTitle = `Gastos de ${date.toLocaleDateString('pt-BR', {timeZone: 'UTC'})}`;
+                chartLabel = 'Gasto Total (R$)';
+                const totalForDay = expenses.reduce((sum, exp) => sum + exp.value, 0);
+                chartData = [totalForDay];
+                chartLabels = [date.toLocaleDateString('pt-BR', {timeZone: 'UTC'})];
+            } else if (monthFilter === 'all') {
+                chartTitle = 'Gastos por Mês (Ano Atual)'; chartLabel = 'Gasto Mensal (R$)';
                 const monthlyTotals = Array(12).fill(0);
                 const currentYear = new Date().getFullYear();
-                expenses.filter(e => e.date.getFullYear() === currentYear).forEach(e => {
-                    monthlyTotals[e.date.getMonth()] += e.value;
-                });
-                chartData = monthlyTotals;
-                chartLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+                expenses.filter(e => e.date.getFullYear() === currentYear).forEach(e => { monthlyTotals[e.date.getMonth()] += e.value; });
+                chartData = monthlyTotals; chartLabels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
             } else {
                 const [year, month] = monthFilter.split('-').map(Number);
                 const date = new Date(year, month - 1, 1);
                 const monthName = date.toLocaleString('pt-BR', { month: 'long' });
-                chartTitle = `Gastos por Dia (${monthName.charAt(0).toUpperCase() + monthName.slice(1)})`;
-                chartLabel = 'Gasto Diário (R$)';
-                
+                chartTitle = `Gastos por Dia (${monthName.charAt(0).toUpperCase() + monthName.slice(1)})`; chartLabel = 'Gasto Diário (R$)';
                 const daysInMonth = new Date(year, month, 0).getDate();
                 const dailyTotals = Array(daysInMonth).fill(0);
-                expenses.forEach(e => {
-                    dailyTotals[e.date.getDate() - 1] += e.value;
-                });
-                chartData = dailyTotals;
-                chartLabels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+                expenses.forEach(e => { dailyTotals[e.date.getDate() - 1] += e.value; });
+                chartData = dailyTotals; chartLabels = Array.from({ length: daysInMonth }, (_, i) => i + 1);
             }
-            
             chartTitleEl.textContent = chartTitle;
-            const ctx = document.getElementById('monthly-chart').getContext('2d');
-            activeCharts['monthly'] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartLabels,
-                    datasets: [{
-                        label: chartLabel,
-                        data: chartData,
-                        backgroundColor: 'rgba(79, 70, 229, 0.8)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
-                        x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: (value) => value > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value) : '',
-                            color: colors.textColor
-                        }
-                    }
-                }
-            });
+            createChart('monthly-chart', 'bar', { labels: chartLabels, datasets: [{ label: chartLabel, data: chartData, backgroundColor: 'rgba(79, 70, 229, 0.8)' }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(v) : '', color: colors.textColor } } });
         }
 
-        function createParetoChart(canvasId, data, label) {
+        function createParetoChart(canvasId, data) {
             const colors = getChartColors();
             const sortedData = Object.entries(data).sort(([,a],[,b]) => b-a);
-            const labels = sortedData.map(item => item[0]);
-            const values = sortedData.map(item => item[1]);
-            const total = values.reduce((sum, val) => sum + val, 0);
+            const labels = sortedData.map(item => item[0]), values = sortedData.map(item => item[1]);
+            const total = values.reduce((s, v) => s + v, 0);
             let cumulative = 0;
-            const cumulativePercentage = values.map(val => {
-                cumulative += val;
-                return total > 0 ? (cumulative / total) * 100 : 0;
-            });
-
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            activeCharts[canvasId] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Gasto (R$)',
-                            data: values,
-                            backgroundColor: 'rgba(79, 70, 229, 0.8)',
-                            yAxisID: 'y',
-                        },
-                        {
-                            label: 'Cumulativo %',
-                            data: cumulativePercentage,
-                            type: 'line',
-                            borderColor: 'rgb(255, 99, 132)',
-                            yAxisID: 'y1',
-                            datalabels: {
-                                display: true,
-                                anchor: 'end',
-                                align: 'top',
-                                color: 'rgb(255, 99, 132)',
-                                formatter: (value) => value.toFixed(1) + '%',
-                            }
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { type: 'linear', position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
-                        y1: { type: 'linear', position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { color: colors.textColor, callback: value => value + '%' } },
-                        x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } // Eixo X adicionado
-                    },
-                    plugins: {
-                        legend: { labels: { color: colors.textColor } },
-                        datalabels: {
-                            display: (context) => context.dataset.type !== 'line',
-                            anchor: 'end',
-                            align: 'top',
-                            formatter: (value) => value > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(value) : '',
-                            color: colors.textColor
-                        }
-                    }
-                }
-            });
+            const cumulativePercentage = values.map(v => { cumulative += v; return total > 0 ? (cumulative / total) * 100 : 0; });
+            createChart(canvasId, 'bar', { labels, datasets: [{ label: 'Gasto (R$)', data: values, backgroundColor: 'rgba(79, 70, 229, 0.8)', yAxisID: 'y' }, { label: 'Cumulativo %', data: cumulativePercentage, type: 'line', borderColor: 'rgb(255, 99, 132)', yAxisID: 'y1', datalabels: { display: true, anchor: 'end', align: 'top', color: 'rgb(255, 99, 132)', formatter: (v) => v.toFixed(1) + '%' } }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, y1: { position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { color: colors.textColor, callback: v => v + '%' } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { labels: { color: colors.textColor } }, datalabels: { display: (c) => c.dataset.type !== 'line', anchor: 'end', align: 'top', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(v) : '', color: colors.textColor } } });
         }
 
         function updateCategoryParetoChart(expenses) {
-            const categoryTotals = expenses.reduce((acc, exp) => {
-                acc[exp.category] = (acc[exp.category] || 0) + exp.value;
-                return acc;
-            }, {});
-            createParetoChart('category-pareto-chart', categoryTotals, 'Gasto por Categoria');
+            const categoryTotals = expenses.reduce((acc, exp) => { acc[exp.category] = (acc[exp.category] || 0) + exp.value; return acc; }, {});
+            createParetoChart('category-pareto-chart', categoryTotals);
         }
 
         function updateWeekdayParetoChart(expenses) {
-            const weekdayTotals = { 'Dom': 0, 'Seg': 0, 'Ter': 0, 'Qua': 0, 'Qui': 0, 'Sex': 0, 'Sáb': 0 };
             const weekdayOrder = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
-            expenses.forEach(exp => {
-                const day = weekdayOrder[exp.date.getDay()];
-                weekdayTotals[day] += exp.value;
-            });
-            createParetoChart('weekday-pareto-chart', weekdayTotals, 'Gasto por Dia da Semana');
+            const weekdayTotals = weekdayOrder.reduce((acc, day) => ({...acc, [day]: 0}), {});
+            expenses.forEach(exp => { weekdayTotals[weekdayOrder[exp.date.getDay()]] += exp.value; });
+            createParetoChart('weekday-pareto-chart', weekdayTotals);
         }
 
         function updateDescriptionRankingChart(expenses) {
             const colors = getChartColors();
-            const descriptionTotals = expenses.reduce((acc, exp) => {
-                acc[exp.description] = (acc[exp.description] || 0) + exp.value;
-                return acc;
-            }, {});
-
-            const sortedData = Object.entries(descriptionTotals).sort(([,a],[,b]) => b-a).slice(0, 10); // Top 10
-            const labels = sortedData.map(item => item[0]);
-            const values = sortedData.map(item => item[1]);
-
-            const ctx = document.getElementById('description-ranking-chart').getContext('2d');
-            activeCharts['description-ranking'] = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Gasto (R$)',
-                        data: values,
-                        backgroundColor: 'rgba(22, 163, 74, 0.8)',
-                    }]
-                },
-                options: {
-                    indexAxis: 'y', // Faz o gráfico ser de barras horizontais
-                    responsive: true,
-                    scales: {
-                        y: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
-                        x: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        datalabels: {
-                            anchor: 'end',
-                            align: 'end',
-                            formatter: (value) => value > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value) : '',
-                            color: colors.textColor
-                        }
-                    }
-                }
-            });
+            const descriptionTotals = expenses.reduce((acc, exp) => { acc[exp.description] = (acc[exp.description] || 0) + exp.value; return acc; }, {});
+            const sortedData = Object.entries(descriptionTotals).sort(([,a],[,b]) => b-a).slice(0, 10);
+            createChart('description-ranking-chart', 'bar', { labels: sortedData.map(i => i[0]), datasets: [{ label: 'Gasto (R$)', data: sortedData.map(i => i[1]), backgroundColor: 'rgba(22, 163, 74, 0.8)' }] }, { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, x: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '', color: colors.textColor } } });
         }
-
 
         // --- EVENT LISTENERS DINÂMICOS ---
         document.body.addEventListener('click', async (e) => {
-            if (e.target.matches('.delete-category-btn')) {
-                if (confirm('Tem certeza?')) await deleteDoc(doc(db, "categories", e.target.dataset.id));
+            const deleteCategoryBtn = e.target.closest('.delete-category-btn');
+            if (deleteCategoryBtn) {
+                const confirmed = await showConfirmationModal('Tem certeza que deseja excluir esta categoria?');
+                if (confirmed) await deleteDoc(doc(db, "categories", deleteCategoryBtn.dataset.id));
             }
-            if (e.target.matches('.delete-expense-btn')) {
-                if (confirm('Tem certeza?')) await deleteDoc(doc(db, "expenses", e.target.dataset.id));
+            const deleteExpenseBtn = e.target.closest('.delete-expense-btn');
+            if (deleteExpenseBtn) {
+                const confirmed = await showConfirmationModal('Tem certeza que deseja excluir este gasto?');
+                if (confirmed) await deleteDoc(doc(db, "expenses", deleteExpenseBtn.dataset.id));
             }
-            if (e.target.matches('.edit-expense-btn')) {
-                const id = e.target.dataset.id;
-                const expenseToEdit = allExpenses.find(exp => exp.id === id);
-                if (expenseToEdit) {
-                    populateExpenseForm(expenseToEdit);
-                }
+            const editExpenseBtn = e.target.closest('.edit-expense-btn');
+            if (editExpenseBtn) {
+                const expenseToEdit = allExpenses.find(exp => exp.id === editExpenseBtn.dataset.id);
+                if (expenseToEdit) populateExpenseForm(expenseToEdit);
             }
         });
 
@@ -923,36 +705,27 @@
             document.getElementById('expenseId').value = expense.id;
             document.getElementById('expenseDescription').value = expense.description;
             document.getElementById('expenseDetail').value = expense.detail;
-            
             const date = new Date(expense.date);
             date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
             document.getElementById('expenseDate').value = date.toISOString().slice(0,16);
-            
             document.getElementById('expenseValue').value = expense.value;
             document.getElementById('expensePayment').value = expense.paymentMethod;
             document.getElementById('expenseCategory').value = expense.category;
-            
             document.getElementById('cancel-expense-edit-btn').classList.remove('hidden');
+            document.getElementById('expense-form').scrollIntoView({ behavior: 'smooth' });
         }
 
         // --- NAVEGAÇÃO E MODAIS ---
-        document.querySelectorAll('.nav-link').forEach(link => {
+        navLinks.forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 document.querySelectorAll('.page-section').forEach(s => s.classList.add('hidden'));
-                document.querySelectorAll('.nav-link').forEach(l => {
-                    l.classList.remove('bg-gray-900', 'text-gray-100');
-                    l.classList.add('text-gray-400');
-                });
-                
+                navLinks.forEach(l => { l.classList.remove('bg-gray-900', 'text-gray-100'); l.classList.add('text-gray-400'); });
                 const sectionId = e.currentTarget.id.replace('nav-', 'section-');
                 document.getElementById(sectionId).classList.remove('hidden');
                 e.currentTarget.classList.add('bg-gray-900', 'text-gray-100');
-                e.currentTarget.classList.remove('text-gray-400');
-
-                if(sectionId === 'section-dashboard' || sectionId === 'section-gastos') {
-                    applyFiltersAndRender(); 
-                }
+                if(sectionId === 'section-dashboard' || sectionId === 'section-gastos') applyFiltersAndRender(); 
+                if (window.innerWidth < 768) toggleMobileSidebar();
             });
         });
         
@@ -965,34 +738,70 @@
             setTimeout(() => categoryModal.classList.add('hidden'), 300);
         });
         
-        // --- CÓPIA DOS CÓDIGOS DE LOGIN/REGISTO ---
-        document.getElementById('login-form').addEventListener('submit', (e) => e.preventDefault());
-        document.getElementById('login-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        // --- CÓDIGOS DE LOGIN/REGISTO ---
+        loginForm.addEventListener('submit', (e) => { e.preventDefault(); loginBtn.click(); });
+        
+        loginBtn.addEventListener('click', async () => {
+            toggleButtonLoading(loginBtn, true);
             errorMessage.textContent = '';
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                await signInWithEmailAndPassword(auth, email.value, password.value);
             } catch (error) {
-                console.error("Erro de login:", error.message);
-                errorMessage.textContent = 'Email ou senha inválidos.';
+                console.error("Erro de login:", error.code);
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                    case 'auth/wrong-password':
+                    case 'auth/invalid-credential':
+                        errorMessage.textContent = 'Email ou senha inválidos.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage.textContent = 'O formato do email é inválido.';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage.textContent = 'Erro de rede. Verifique a sua conexão.';
+                        break;
+                    default:
+                        errorMessage.textContent = 'Ocorreu um erro ao tentar fazer o login.';
+                        break;
+                }
+                toggleButtonLoading(loginBtn, false, 'Entrar');
             }
         });
-        document.getElementById('register-btn').addEventListener('click', async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-             errorMessage.textContent = '';
-            if (password.length < 6) {
+
+        registerBtn.addEventListener('click', async () => {
+            toggleButtonLoading(registerBtn, true, '');
+            errorMessage.textContent = '';
+            if (password.value.length < 6) {
                 errorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
+                toggleButtonLoading(registerBtn, false, 'Registar Nova Conta');
                 return;
             }
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await createUserWithEmailAndPassword(auth, email.value, password.value);
             } catch (error) {
-                console.error("Erro de registo:", error.message);
-                errorMessage.textContent = 'Não foi possível registar. O email pode já estar em uso.';
+                console.error("Erro de registo:", error.code);
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage.textContent = 'Este email já está a ser utilizado.';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage.textContent = 'O formato do email é inválido.';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage.textContent = 'A senha é muito fraca (mínimo 6 caracteres).';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage.textContent = 'Erro de rede. Verifique a sua conexão.';
+                        break;
+                    default:
+                        errorMessage.textContent = 'Ocorreu um erro ao tentar registar.';
+                        break;
+                }
+                toggleButtonLoading(registerBtn, false, 'Registar Nova Conta');
             }
         });
+
+        logoutBtn.addEventListener('click', () => signOut(auth).catch(error => console.error("Erro ao fazer logout:", error)));
 
     </script>
 </body>
