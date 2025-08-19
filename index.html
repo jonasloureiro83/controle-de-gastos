@@ -96,7 +96,17 @@
                             <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Média Diária (Mês)</h3><p id="summary-avg-daily" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Gastos nos Últimos 8 Dias</h2><div class="h-80 relative"><canvas id="expenses-chart"></canvas></div></div>
+                            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                                    <h2 id="daily-chart-title" class="text-xl font-bold text-gray-800 dark:text-white">Gastos Diários</h2>
+                                    <div class="flex items-center gap-2">
+                                        <label for="days-filter" class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Mostrar últimos:</label>
+                                        <input type="number" id="days-filter" value="8" min="2" max="90" class="w-20 p-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">dias</span>
+                                    </div>
+                                </div>
+                                <div class="h-80 relative"><canvas id="expenses-chart"></canvas></div>
+                            </div>
                             <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Lançar Gasto</h2><form id="expense-form"><input type="hidden" id="expenseId"><div class="space-y-4"><input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><input type="datetime-local" id="expenseDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><option>Crédito</option><option>Dinheiro</option><option>Débito</option><option>Pix</option><option>VA</option></select><div class="flex items-center space-x-2"><select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select><button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button></div><button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button><button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button></div></form></div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
@@ -185,7 +195,7 @@
             apiKey: "AIzaSyAL8d8aHshkzIhkGOr6gQD8LlkwxcOqOGY",
             authDomain: "sistema-vendas-dcb7e.firebaseapp.com",
             projectId: "sistema-vendas-dcb7e",
-            storageBucket: "sistema-vendas-dcb7e.firebasestorage.app",
+            storageBucket: "sistema-vendas-dcb7e.appspot.com",
             messagingSenderId: "557933299875",
             appId: "1:557933299875:web:12dd1f59065001ff961716"
         };
@@ -225,6 +235,7 @@
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
+        const daysFilterInput = document.getElementById('days-filter');
         
         let unsubscribeExpenses = null;
         let unsubscribeCategories = null;
@@ -451,7 +462,7 @@
             updateAllCharts(dashboardExpenses, filteredExpenses);
         }
 
-        [filterDescription, filterCategorySelect, filterPaymentSelect, filterDate, dashboardMonthFilter, dashboardDateFilter, dashboardWeekdayFilter].forEach(el => el.addEventListener('input', applyFiltersAndRender));
+        [filterDescription, filterCategorySelect, filterPaymentSelect, filterDate, dashboardMonthFilter, dashboardDateFilter, dashboardWeekdayFilter, daysFilterInput].forEach(el => el.addEventListener('input', applyFiltersAndRender));
         
         document.getElementById('clear-filters-btn').addEventListener('click', () => {
             filterDescription.value = '';
@@ -659,7 +670,8 @@
 
         function updateAllCharts(dashboardExpenses, gastosFilteredExpenses) {
             destroyAllCharts();
-            update7DayChart(gastosFilteredExpenses);
+            const numDays = parseInt(document.getElementById('days-filter').value, 10) || 8;
+            updateDailyExpensesChart(gastosFilteredExpenses, numDays);
             updateMonthlyOrDailyChart(dashboardExpenses);
             updateCategoryParetoChart(dashboardExpenses);
             updateWeekdayParetoChart(dashboardExpenses);
@@ -681,12 +693,13 @@
             }
         }
 
-        function update7DayChart(expenses) {
+        function updateDailyExpensesChart(expenses, numDays) {
+            document.getElementById('daily-chart-title').textContent = `Gastos nos Últimos ${numDays} Dias`;
             const colors = getChartColors();
             const datePoints = [];
             const lastDaysData = {};
 
-            for (let i = 7; i >= 0; i--) {
+            for (let i = numDays - 1; i >= 0; i--) {
                 const d = new Date();
                 d.setDate(d.getDate() - i);
                 d.setHours(0, 0, 0, 0);
@@ -718,7 +731,27 @@
                 labels: chartLabels,
                 datasets: [
                     { label: 'Gasto Diário (R$)', data: chartData, backgroundColor: 'rgba(79, 70, 229, 0.8)', yAxisID: 'y', order: 1 },
-                    { label: '% do Total', data: percentageData, type: 'line', borderColor: 'rgb(255, 99, 132)', yAxisID: 'y1', order: 0, datalabels: { display: true, anchor: 'end', align: 'end', color: 'rgb(255, 99, 132)', backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 4, padding: 4, font: { weight: 'bold' }, formatter: (v) => v > 0 ? v.toFixed(1) + '%' : '' } }
+                    { 
+                        label: '% do Total', 
+                        data: percentageData, 
+                        type: 'line', 
+                        borderColor: 'rgb(255, 99, 132)', 
+                        borderDash: [5, 5], 
+                        yAxisID: 'y1', 
+                        order: 0, 
+                        datalabels: { 
+                            display: true, 
+                            anchor: 'end', 
+                            align: 'end', 
+                            color: 'rgb(255, 99, 132)', 
+                            backgroundColor: 'rgba(0,0,0,0.5)', 
+                            borderRadius: 4, 
+                            padding: 4, 
+                            offset: 4,
+                            font: { weight: 'bold' }, 
+                            formatter: (v) => v > 0 ? v.toFixed(1) + '%' : '' 
+                        } 
+                    }
                 ]
             }, {
                 responsive: true,
@@ -731,7 +764,14 @@
                 },
                 plugins: {
                     legend: { labels: { color: colors.textColor } },
-                    datalabels: { display: (c) => c.dataset.type !== 'line', anchor: 'end', align: 'top', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v) : '', color: colors.textColor, font: { weight: 'bold' } }
+                    datalabels: { 
+                        display: (c) => c.dataset.type !== 'line', 
+                        anchor: 'end', 
+                        align: 'start',
+                        color: '#FFFFFF', 
+                        font: { weight: 'bold' },
+                        formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(v) : ''
+                    }
                 }
             });
         }
