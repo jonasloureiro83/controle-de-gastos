@@ -98,18 +98,25 @@
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                             <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
-                                    <h2 id="daily-chart-title" class="text-xl font-bold text-gray-800 dark:text-white">Gastos Diários</h2>
+                                    <div class="flex items-center gap-2">
+                                        <h2 id="daily-chart-title" class="text-xl font-bold text-gray-800 dark:text-white">Gastos Diários</h2>
+                                        <span id="daily-chart-total" class="text-lg font-medium text-gray-500 dark:text-gray-400"></span>
+                                        <button id="toggle-variation-chart-btn" title="Mostrar/Ocultar Variação" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"></button>
+                                    </div>
                                     <div class="flex items-center gap-2">
                                         <label for="days-filter" class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Mostrar últimos:</label>
                                         <input type="number" id="days-filter" value="8" min="2" max="90" class="w-20 p-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                         <span class="text-sm text-gray-600 dark:text-gray-300">dias</span>
                                     </div>
                                 </div>
-                                <!-- INÍCIO DA ALTERAÇÃO: Removida a altura fixa 'h-80' -->
                                 <div class="relative"><canvas id="expenses-chart"></canvas></div>
-                                <!-- FIM DA ALTERAÇÃO -->
                             </div>
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Lançar Gasto</h2><form id="expense-form"><input type="hidden" id="expenseId"><div class="space-y-4"><input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><input type="datetime-local" id="expenseDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><option>Crédito</option><option>Dinheiro</option><option>Débito</option><option>Pix</option><option>VA</option></select><div class="flex items-center space-x-2"><select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select><button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button></div><button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button><button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button></div></form></div>
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Lançar Gasto</h2><form id="expense-form"><input type="hidden" id="expenseId"><div class="space-y-4"><input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <input type="date" id="expenseDateDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                    <input type="time" id="expenseDateTime" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                </div>
+                                <input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><option>Crédito</option><option>Dinheiro</option><option>Débito</option><option>Pix</option><option>VA</option></select><div class="flex items-center space-x-2"><select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select><button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button></div><button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button><button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button></div></form></div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
                             <div class="p-4 flex flex-col sm:flex-row flex-wrap items-center gap-4 dark:text-white">
@@ -238,6 +245,7 @@
         const loginBtn = document.getElementById('login-btn');
         const registerBtn = document.getElementById('register-btn');
         const daysFilterInput = document.getElementById('days-filter');
+        const toggleVariationBtn = document.getElementById('toggle-variation-chart-btn');
         
         let unsubscribeExpenses = null;
         let unsubscribeCategories = null;
@@ -374,6 +382,19 @@
             }
         }
         
+        function setCurrentDateTime() {
+            const dateInput = document.getElementById('expenseDateDate');
+            const timeInput = document.getElementById('expenseDateTime');
+            if (!dateInput || !timeInput) return;
+
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            const localISOString = now.toISOString();
+
+            dateInput.value = localISOString.slice(0, 10);
+            timeInput.value = localISOString.slice(11, 16);
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 loginSection.classList.add('hidden');
@@ -381,6 +402,7 @@
                 userInfo.textContent = user.email;
                 await setupInitialData(user.uid);
                 startAppListeners(user.uid);
+                setCurrentDateTime(); // Define a data/hora ao carregar o app
             } else {
                 appSection.classList.add('hidden');
                 loginSection.classList.remove('hidden');
@@ -522,10 +544,12 @@
         expenseForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const id = document.getElementById('expenseId').value;
+            const dateValue = document.getElementById('expenseDateDate').value;
+            const timeValue = document.getElementById('expenseDateTime').value;
             const expenseData = {
                 description: document.getElementById('expenseDescription').value,
                 detail: document.getElementById('expenseDetail').value,
-                date: new Date(document.getElementById('expenseDate').value),
+                date: new Date(`${dateValue}T${timeValue}`),
                 value: parseFloat(document.getElementById('expenseValue').value),
                 paymentMethod: document.getElementById('expensePayment').value,
                 category: document.getElementById('expenseCategory').value,
@@ -539,8 +563,11 @@
         });
         
         function resetExpenseForm() {
-            expenseForm.reset();
             document.getElementById('expenseId').value = '';
+            document.getElementById('expenseDescription').value = '';
+            document.getElementById('expenseDetail').value = '';
+            document.getElementById('expenseValue').value = '';
+            setCurrentDateTime(); // Define a data e hora para o momento atual
             document.getElementById('cancel-expense-edit-btn').classList.add('hidden');
         }
         document.getElementById('cancel-expense-edit-btn').addEventListener('click', resetExpenseForm);
@@ -695,8 +722,30 @@
             }
         }
 
+        // INÍCIO DA ALTERAÇÃO: Adicionadas constantes de ícones e função de atualização do botão
+        const eyeIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>`;
+        const eyeSlashIcon = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18"></path></svg>`;
+
+        function updateToggleVariationButton(isVisible) {
+            if (toggleVariationBtn) {
+                toggleVariationBtn.innerHTML = isVisible ? eyeIcon : eyeSlashIcon;
+            }
+        }
+
+        toggleVariationBtn.addEventListener('click', () => {
+            const chart = activeCharts['expenses-chart'];
+            if (!chart) return;
+
+            const isVisible = chart.isDatasetVisible(1);
+            chart.setDatasetVisibility(1, !isVisible);
+            chart.update();
+            updateToggleVariationButton(!isVisible);
+        });
+        // FIM DA ALTERAÇÃO
+
         function updateDailyExpensesChart(expenses, numDays) {
             document.getElementById('daily-chart-title').textContent = `Gastos nos Últimos ${numDays} Dias`;
+            const totalEl = document.getElementById('daily-chart-total');
             const colors = getChartColors();
             const datePoints = [];
             const lastDaysData = {};
@@ -727,44 +776,74 @@
             const chartData = datePoints.map(d => lastDaysData[d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })]);
             
             const totalRange = chartData.reduce((a, b) => a + b, 0);
-            const percentageData = chartData.map(value => totalRange > 0 ? (value / totalRange) * 100 : 0);
+            if (totalEl) {
+                totalEl.textContent = `(Total: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalRange)})`;
+            }
+
+            const variationData = [0];
+            const variationValues = [0];
+            for (let i = 1; i < chartData.length; i++) {
+                const previousDayValue = chartData[i - 1];
+                const currentDayValue = chartData[i];
+                const valueDiff = currentDayValue - previousDayValue;
+                variationValues.push(valueDiff);
+
+                if (previousDayValue === 0) {
+                    variationData.push(currentDayValue > 0 ? 100 : 0);
+                } else {
+                    const percentageDiff = (valueDiff / previousDayValue) * 100;
+                    variationData.push(percentageDiff);
+                }
+            }
             
             createChart('expenses-chart', 'bar', {
                 labels: chartLabels,
                 datasets: [
                     { label: 'Gasto Diário (R$)', data: chartData, backgroundColor: 'rgba(79, 70, 229, 0.8)', yAxisID: 'y', order: 1 },
                     { 
-                        label: '% do Total', 
-                        data: percentageData, 
+                        label: 'Variação Diária', 
+                        data: variationData, 
                         type: 'line', 
-                        borderColor: 'rgb(255, 99, 132)', 
+                        borderColor: (c) => {
+                            if (!c.chart.isDatasetVisible(1)) return 'transparent';
+                            const value = c.dataset.data[c.p1DataIndex];
+                            return value >= 0 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(22, 163, 74, 0.8)';
+                        },
                         borderDash: [5, 5], 
                         yAxisID: 'y1', 
                         order: 0, 
                         datalabels: { 
-                            display: true, 
-                            anchor: 'end', 
-                            align: 'end', 
-                            color: 'rgb(255, 99, 132)', 
-                            backgroundColor: 'rgba(0,0,0,0.5)', 
-                            borderRadius: 4, 
-                            padding: 4, 
+                            display: (c) => c.dataIndex > 0,
+                            anchor: 'end',
+                            align: (c) => c.dataset.data[c.dataIndex] >= 0 ? 'end' : 'start',
+                            color: (c) => c.dataset.data[c.dataIndex] >= 0 ? 'rgb(239, 68, 68)' : 'rgb(22, 163, 74)',
+                            backgroundColor: 'rgba(0,0,0,0.5)',
+                            borderRadius: 4,
+                            padding: 4,
                             offset: 4,
-                            font: { weight: 'bold' }, 
-                            formatter: (v) => v > 0 ? v.toFixed(1) + '%' : '' 
+                            font: { weight: 'bold', size: 10 },
+                            formatter: (value, context) => {
+                                const valueDiff = variationValues[context.dataIndex];
+                                const formattedValue = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', signDisplay: 'always' }).format(valueDiff);
+                                const formattedPercentage = `(${value.toFixed(1)}%)`;
+                                return `${formattedValue}\n${formattedPercentage}`;
+                            }
                         } 
                     }
                 ]
             }, {
                 responsive: true,
-                // INÍCIO DA ALTERAÇÃO: Ajuste da proporção do gráfico
                 maintainAspectRatio: true,
                 aspectRatio: 2.5,
-                // FIM DA ALTERAÇÃO
                 interaction: { mode: 'index', intersect: false },
                 scales: {
                     y: { display: true, position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } },
-                    y1: { display: false, position: 'right', grid: { drawOnChartArea: false } },
+                    y1: { 
+                        display: true, 
+                        position: 'right', 
+                        grid: { drawOnChartArea: false }, 
+                        ticks: { color: colors.textColor, callback: (value) => value + '%' }
+                    },
                     x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }
                 },
                 plugins: {
@@ -779,6 +858,12 @@
                     }
                 }
             });
+            // INÍCIO DA ALTERAÇÃO: Atualiza o ícone do botão ao criar o gráfico
+            const chart = activeCharts['expenses-chart'];
+            if (chart) {
+                updateToggleVariationButton(chart.isDatasetVisible(1));
+            }
+            // FIM DA ALTERAÇÃO
         }
 
         function updateMonthlyOrDailyChart(expenses) {
@@ -874,7 +959,10 @@
             document.getElementById('expenseDetail').value = expense.detail;
             const date = new Date(expense.date);
             date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-            document.getElementById('expenseDate').value = date.toISOString().slice(0,16);
+            const localISOString = date.toISOString();
+            
+            document.getElementById('expenseDateDate').value = localISOString.slice(0, 10); // YYYY-MM-DD
+            document.getElementById('expenseDateTime').value = localISOString.slice(11, 16); // HH:mm
             document.getElementById('expenseValue').value = expense.value;
             document.getElementById('expensePayment').value = expense.paymentMethod;
             document.getElementById('expenseCategory').value = expense.category;
