@@ -45,6 +45,7 @@
             height: 100vh;
             z-index: 50;
             padding: 2rem;
+            background: inherit; /* Herda o fundo do elemento */
         }
     </style>
 </head>
@@ -115,7 +116,7 @@
                                     </div>
                                     <div class="flex items-center gap-2">
                                         <button id="toggle-variation-chart-btn" title="Mostrar/Ocultar Variação" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"></button>
-                                        <button id="fullscreen-chart-btn" title="Tela Cheia" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                        <button data-target="daily-chart-card" title="Tela Cheia" class="fullscreen-btn text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5 5"></path></svg>
                                         </button>
                                         <label for="days-filter" class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Mostrar últimos:</label>
@@ -207,10 +208,46 @@
                             </div>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 id="monthly-chart-title" class="text-xl font-bold mb-4 text-gray-800 dark:text-white"></h2><div class="h-80 relative"><canvas id="monthly-chart"></canvas></div></div>
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Pareto de Gastos por Categoria</h2><div class="h-80 relative"><canvas id="category-pareto-chart"></canvas></div></div>
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Pareto de Gastos por Dia da Semana</h2><div class="h-80 relative"><canvas id="weekday-pareto-chart"></canvas></div></div>
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Ranking de Gastos por Descrição</h2><div class="h-96 relative"><canvas id="description-ranking-chart"></canvas></div></div>
+                            <!-- Card do Gráfico Mensal -->
+                            <div id="monthly-chart-card" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 id="monthly-chart-title" class="text-xl font-bold text-gray-800 dark:text-white"></h2>
+                                    <button data-target="monthly-chart-card" title="Tela Cheia" class="fullscreen-btn text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5 5"></path></svg>
+                                    </button>
+                                </div>
+                                <div class="h-80 relative flex-grow"><canvas id="monthly-chart"></canvas></div>
+                            </div>
+                            <!-- Card do Gráfico Pareto de Categoria -->
+                            <div id="category-pareto-chart-card" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">Pareto de Gastos por Categoria</h2>
+                                    <button data-target="category-pareto-chart-card" title="Tela Cheia" class="fullscreen-btn text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5 5"></path></svg>
+                                    </button>
+                                </div>
+                                <div class="h-80 relative flex-grow"><canvas id="category-pareto-chart"></canvas></div>
+                            </div>
+                            <!-- Card do Gráfico Pareto de Dia da Semana -->
+                            <div id="weekday-pareto-chart-card" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">Pareto de Gastos por Dia da Semana</h2>
+                                    <button data-target="weekday-pareto-chart-card" title="Tela Cheia" class="fullscreen-btn text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5 5"></path></svg>
+                                    </button>
+                                </div>
+                                <div class="h-80 relative flex-grow"><canvas id="weekday-pareto-chart"></canvas></div>
+                            </div>
+                            <!-- Card do Gráfico Ranking de Descrição -->
+                            <div id="description-ranking-chart-card" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h2 class="text-xl font-bold text-gray-800 dark:text-white">Ranking de Gastos por Descrição</h2>
+                                    <button data-target="description-ranking-chart-card" title="Tela Cheia" class="fullscreen-btn text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5 5"></path></svg>
+                                    </button>
+                                </div>
+                                <div class="h-96 relative flex-grow"><canvas id="description-ranking-chart"></canvas></div>
+                            </div>
                         </div>
                     </section>
                 </main>
@@ -287,13 +324,12 @@
         const registerBtn = document.getElementById('register-btn');
         const daysFilterInput = document.getElementById('days-filter');
         const toggleVariationBtn = document.getElementById('toggle-variation-chart-btn');
-        const fullscreenBtn = document.getElementById('fullscreen-chart-btn');
-        const dailyChartCard = document.getElementById('daily-chart-card');
         
         let unsubscribeExpenses = null;
         let unsubscribeCategories = null;
         let activeCharts = {};
         let allExpenses = [];
+        let dashboardExpenses = []; // Variável para armazenar os dados filtrados do dashboard
 
         // --- LÓGICA DO MODAL DE CONFIRMAÇÃO ---
         const confirmationModal = document.getElementById('confirmation-modal');
@@ -515,10 +551,10 @@
             const dashboardWeekdayValue = dashboardWeekdayFilter.value;
             const dashboardDescriptionValue = dashboardDescriptionFilter.value.toLowerCase().trim();
             
-            let dashboardExpenses = allExpenses;
+            let currentDashboardExpenses = allExpenses;
 
             if (dashboardDescriptionValue) {
-                dashboardExpenses = dashboardExpenses.filter(exp => 
+                currentDashboardExpenses = currentDashboardExpenses.filter(exp => 
                     exp.description.toLowerCase().includes(dashboardDescriptionValue)
                 );
             }
@@ -526,15 +562,16 @@
             if (dashboardDateValue) {
                 const startOfDay = new Date(dashboardDateValue + 'T00:00:00');
                 const endOfDay = new Date(dashboardDateValue + 'T23:59:59.999');
-                dashboardExpenses = dashboardExpenses.filter(exp => exp.date >= startOfDay && exp.date <= endOfDay);
+                currentDashboardExpenses = currentDashboardExpenses.filter(exp => exp.date >= startOfDay && exp.date <= endOfDay);
             } else if (dashboardWeekdayValue !== 'all') {
-                dashboardExpenses = dashboardExpenses.filter(exp => exp.date.getDay() == dashboardWeekdayValue);
+                currentDashboardExpenses = currentDashboardExpenses.filter(exp => exp.date.getDay() == dashboardWeekdayValue);
             } else if (monthFilter !== 'all') {
                 const [year, month] = monthFilter.split('-').map(Number);
-                dashboardExpenses = dashboardExpenses.filter(exp => exp.date.getFullYear() === year && exp.date.getMonth() === month - 1);
+                currentDashboardExpenses = currentDashboardExpenses.filter(exp => exp.date.getFullYear() === year && exp.date.getMonth() === month - 1);
             }
             
-            updateAllCharts(dashboardExpenses, filteredExpenses);
+            dashboardExpenses = currentDashboardExpenses; // Atualiza a variável global
+            updateAllCharts(filteredExpenses);
         }
 
         [filterDescription, filterCategorySelect, filterPaymentSelect, filterDate, dashboardDescriptionFilter, dashboardMonthFilter, dashboardDateFilter, dashboardWeekdayFilter, daysFilterInput].forEach(el => el.addEventListener('input', applyFiltersAndRender));
@@ -750,14 +787,14 @@
             activeCharts = {};
         }
 
-        function updateAllCharts(dashboardExpenses, gastosFilteredExpenses) {
+        function updateAllCharts(gastosFilteredExpenses) {
             destroyAllCharts();
             const numDays = parseInt(document.getElementById('days-filter').value, 10) || 8;
             updateDailyExpensesChart(gastosFilteredExpenses, numDays);
-            updateMonthlyOrDailyChart(dashboardExpenses);
-            updateCategoryParetoChart(dashboardExpenses);
-            updateWeekdayParetoChart(dashboardExpenses);
-            updateDescriptionRankingChart(dashboardExpenses);
+            updateMonthlyOrDailyChart();
+            updateCategoryParetoChart();
+            updateWeekdayParetoChart();
+            updateDescriptionRankingChart();
         }
         
         function getChartColors() {
@@ -768,9 +805,96 @@
             };
         }
 
+        // --- LÓGICA DE TOOLTIPS DOS GRÁFICOS ---
+        function tooltipTitleCallback(tooltipItems) {
+            const item = tooltipItems[0];
+            if (!item) return '';
+            // Para rótulos de várias linhas (como no gráfico diário), junte-os
+            if (Array.isArray(item.label)) {
+                return item.label.join(' ');
+            }
+            return item.label;
+        }
+
+        function tooltipFooterCallback(tooltipItems) {
+            const item = tooltipItems[0];
+            if (!item) return '';
+
+            const label = Array.isArray(item.label) ? item.label[0] : item.label;
+            const chartId = item.chart.canvas.id;
+
+            let relevantExpenses = [];
+
+            // Lógica para filtrar despesas com base no gráfico e no rótulo
+            if (chartId === 'category-pareto-chart') {
+                relevantExpenses = dashboardExpenses.filter(e => e.category === label);
+            } else if (chartId === 'weekday-pareto-chart') {
+                const weekdayMap = {'Dom': 0, 'Seg': 1, 'Ter': 2, 'Qua': 3, 'Qui': 4, 'Sex': 5, 'Sáb': 6};
+                const dayIndex = weekdayMap[label];
+                relevantExpenses = dashboardExpenses.filter(e => e.date.getDay() === dayIndex);
+            } else if (chartId === 'description-ranking-chart') {
+                relevantExpenses = dashboardExpenses.filter(e => e.description === label);
+            } else if (chartId === 'monthly-chart') {
+                const monthFilter = dashboardMonthFilter.value;
+                const dateFilter = dashboardDateFilter.value;
+                if (dateFilter) {
+                    relevantExpenses = dashboardExpenses;
+                } else if (monthFilter === 'all') {
+                    const monthIndex = item.dataIndex;
+                    const currentYear = new Date().getFullYear();
+                    relevantExpenses = allExpenses.filter(e => e.date.getMonth() === monthIndex && e.date.getFullYear() === currentYear);
+                } else {
+                    const dayOfMonth = parseInt(label, 10);
+                    relevantExpenses = dashboardExpenses.filter(e => e.date.getDate() === dayOfMonth);
+                }
+            } else if (chartId === 'expenses-chart') {
+                const numDays = parseInt(daysFilterInput.value, 10) || 8;
+                const targetDate = new Date();
+                targetDate.setDate(targetDate.getDate() - (numDays - 1) + item.dataIndex);
+                relevantExpenses = allExpenses.filter(e => 
+                    e.date.getDate() === targetDate.getDate() &&
+                    e.date.getMonth() === targetDate.getMonth() &&
+                    e.date.getFullYear() === targetDate.getFullYear()
+                );
+            }
+
+            if (!relevantExpenses.length) return '';
+
+            // Ordena por valor decrescente e pega os 5 principais para brevidade
+            const sortedDescriptions = relevantExpenses
+                .sort((a, b) => b.value - a.value)
+                .slice(0, 5); 
+
+            if (!sortedDescriptions.length) return '';
+
+            const footer = sortedDescriptions.map(e => {
+                const val = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(e.value);
+                return `${e.description}: ${val}`;
+            });
+
+            const header = ['\nDescrições (Maiores Gastos):'];
+            if (relevantExpenses.length > 5) {
+                footer.push('...');
+            }
+            
+            return header.concat(footer);
+        }
+
         function createChart(canvasId, type, data, options) {
             const ctx = document.getElementById(canvasId)?.getContext('2d');
             if (ctx) {
+                // Adiciona callbacks e estilo de tooltip a todas as opções de gráfico
+                options.plugins = options.plugins || {};
+                options.plugins.tooltip = {
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    titleFont: { weight: 'bold' },
+                    bodySpacing: 4,
+                    padding: 10,
+                    callbacks: {
+                        title: tooltipTitleCallback,
+                        footer: tooltipFooterCallback
+                    }
+                };
                 activeCharts[canvasId] = new Chart(ctx, { type, data, options });
             }
         }
@@ -795,23 +919,38 @@
         });
 
         // --- LÓGICA DE TELA CHEIA ---
-        fullscreenBtn.addEventListener('click', () => {
+        function toggleFullscreen(cardElement) {
             if (!document.fullscreenElement) {
-                dailyChartCard.requestFullscreen().catch(err => {
-                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                cardElement.requestFullscreen().catch(err => {
+                    showConfirmationModal(`Erro ao ativar tela cheia: ${err.message}. Tente novamente.`);
                 });
             } else {
-                document.exitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
             }
+        }
+
+        document.querySelectorAll('.fullscreen-btn').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const targetId = e.currentTarget.dataset.target;
+                const cardElement = document.getElementById(targetId);
+                if (cardElement) {
+                    toggleFullscreen(cardElement);
+                }
+            });
         });
 
         document.addEventListener('fullscreenchange', () => {
-            const isFullscreen = !!document.fullscreenElement;
-            dailyChartCard.classList.toggle('chart-fullscreen', isFullscreen);
+            const fullscreenElement = document.fullscreenElement;
+            document.querySelectorAll('.bg-white').forEach(card => {
+                card.classList.remove('chart-fullscreen');
+            });
+
+            if (fullscreenElement) {
+                fullscreenElement.classList.add('chart-fullscreen');
+            }
             
-            // Adiciona um pequeno atraso para garantir que o DOM foi atualizado
-            // antes de redimensionar o gráfico. Chamar applyFiltersAndRender()
-            // garante que o gráfico seja completamente redesenhado com o tamanho correto.
             setTimeout(() => {
                 applyFiltersAndRender();
             }, 50);
@@ -938,7 +1077,7 @@
             }
         }
 
-        function updateMonthlyOrDailyChart(expenses) {
+        function updateMonthlyOrDailyChart() {
             const colors = getChartColors();
             const chartTitleEl = document.getElementById('monthly-chart-title');
             const monthFilter = dashboardMonthFilter.value;
@@ -949,7 +1088,7 @@
                 const date = new Date(dateFilter + 'T00:00:00');
                 chartTitle = `Gastos de ${date.toLocaleDateString('pt-BR', {timeZone: 'UTC'})}`;
                 chartLabel = 'Gasto Total (R$)';
-                const totalForDay = expenses.reduce((sum, exp) => sum + exp.value, 0);
+                const totalForDay = dashboardExpenses.reduce((sum, exp) => sum + exp.value, 0);
                 chartData = [totalForDay];
                 chartLabels = [date.toLocaleDateString('pt-BR', {timeZone: 'UTC'})];
             } else if (monthFilter === 'all') {
@@ -966,7 +1105,7 @@
                 const daysInMonth = new Date(year, month, 0).getDate();
                 const dailyTotals = Array(daysInMonth).fill(0);
                 
-                expenses.forEach(e => { 
+                dashboardExpenses.forEach(e => { 
                     dailyTotals[e.date.getDate() - 1] += e.value;
                 });
                 chartData = dailyTotals; 
@@ -986,21 +1125,21 @@
             createChart(canvasId, 'bar', { labels, datasets: [{ label: 'Gasto (R$)', data: values, backgroundColor: 'rgba(79, 70, 229, 0.8)', yAxisID: 'y' }, { label: 'Cumulativo %', data: cumulativePercentage, type: 'line', borderColor: 'rgb(255, 99, 132)', yAxisID: 'y1', datalabels: { display: true, anchor: 'end', align: 'top', color: 'rgb(255, 99, 132)', formatter: (v) => v.toFixed(1) + '%' } }] }, { responsive: true, maintainAspectRatio: false, scales: { y: { position: 'left', beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, y1: { position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false }, ticks: { color: colors.textColor, callback: v => v + '%' } }, x: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { labels: { color: colors.textColor } }, datalabels: { display: (c) => c.dataset.type !== 'line', anchor: 'end', align: 'top', formatter: (v) => v > 0 ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact' }).format(v) : '', color: colors.textColor } } });
         }
 
-        function updateCategoryParetoChart(expenses) {
-            const categoryTotals = expenses.reduce((acc, exp) => { acc[exp.category] = (acc[exp.category] || 0) + exp.value; return acc; }, {});
+        function updateCategoryParetoChart() {
+            const categoryTotals = dashboardExpenses.reduce((acc, exp) => { acc[exp.category] = (acc[exp.category] || 0) + exp.value; return acc; }, {});
             createParetoChart('category-pareto-chart', categoryTotals);
         }
 
-        function updateWeekdayParetoChart(expenses) {
+        function updateWeekdayParetoChart() {
             const weekdayOrder = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
             const weekdayTotals = weekdayOrder.reduce((acc, day) => ({...acc, [day]: 0}), {});
-            expenses.forEach(exp => { weekdayTotals[weekdayOrder[exp.date.getDay()]] += exp.value; });
+            dashboardExpenses.forEach(exp => { weekdayTotals[weekdayOrder[exp.date.getDay()]] += exp.value; });
             createParetoChart('weekday-pareto-chart', weekdayTotals);
         }
 
-        function updateDescriptionRankingChart(expenses) {
+        function updateDescriptionRankingChart() {
             const colors = getChartColors();
-            const descriptionTotals = expenses.reduce((acc, exp) => { acc[exp.description] = (acc[exp.description] || 0) + exp.value; return acc; }, {});
+            const descriptionTotals = dashboardExpenses.reduce((acc, exp) => { acc[exp.description] = (acc[exp.description] || 0) + exp.value; return acc; }, {});
             const sortedData = Object.entries(descriptionTotals).sort(([,a],[,b]) => b-a).slice(0, 10);
             const top10Total = sortedData.reduce((sum, [, value]) => sum + value, 0);
             createChart('description-ranking-chart', 'bar', { labels: sortedData.map(i => i[0]), datasets: [{ label: 'Gasto (R$)', data: sortedData.map(i => i[1]), backgroundColor: 'rgba(22, 163, 74, 0.8)' }] }, { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { y: { grid: { color: colors.gridColor }, ticks: { color: colors.textColor } }, x: { beginAtZero: true, grid: { color: colors.gridColor }, ticks: { color: colors.textColor } } }, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'end', formatter: (value) => { const percentage = top10Total > 0 ? (value / top10Total) * 100 : 0; const currencyString = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value); const percentageString = `(${percentage.toFixed(1)}%)`; return [currencyString, percentageString]; }, color: colors.textColor, font: { size: 10 } } } });
