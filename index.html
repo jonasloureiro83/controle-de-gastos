@@ -36,6 +36,16 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        /* Estilos para o modo de tela cheia do gráfico */
+        .chart-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 50;
+            padding: 2rem;
+        }
     </style>
 </head>
 <body class="bg-gray-100 dark:bg-gray-900">
@@ -75,6 +85,7 @@
                 <div class="h-16 flex items-center justify-center"><span id="sidebar-title" class="text-2xl font-bold transition-all duration-300 whitespace-nowrap">Meu Sistema</span></div>
                 <nav class="flex-1 px-2 py-4 space-y-2">
                     <a href="#" id="nav-gastos" class="nav-link flex items-center px-4 py-2 text-gray-100 bg-gray-900 rounded-md"><svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg><span class="sidebar-text">Gastos</span></a>
+                    <a href="#" id="nav-lancar" class="nav-link flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md"><svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg><span class="sidebar-text">Lançar Gasto</span></a>
                     <a href="#" id="nav-dashboard" class="nav-link flex items-center px-4 py-2 text-gray-400 hover:bg-gray-700 hover:text-white rounded-md"><svg class="h-6 w-6 mr-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg><span class="sidebar-text">Dashboard</span></a>
                 </nav>
                 <div class="px-2 py-4">
@@ -96,27 +107,24 @@
                             <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md flex items-center"><div class="mr-4 bg-indigo-100 dark:bg-indigo-500/20 p-3 rounded-full"><svg class="h-6 w-6 text-indigo-500 dark:text-indigo-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v.01M12 6v-1m0 1H9m3 0h3m-3 18a9 9 0 110-18 9 9 0 010 18z"></path></svg></div><div><h3 class="text-sm text-gray-500 dark:text-gray-400">Média Diária (Mês)</h3><p id="summary-avg-daily" class="text-lg md:text-xl font-bold text-gray-800 dark:text-white">R$ 0,00</p></div></div>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                            <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                            <div id="daily-chart-card" class="lg:col-span-3 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md flex flex-col">
                                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
                                     <div class="flex items-center gap-2">
                                         <h2 id="daily-chart-title" class="text-xl font-bold text-gray-800 dark:text-white">Gastos Diários</h2>
                                         <span id="daily-chart-total" class="text-lg font-medium text-gray-500 dark:text-gray-400"></span>
-                                        <button id="toggle-variation-chart-btn" title="Mostrar/Ocultar Variação" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"></button>
                                     </div>
                                     <div class="flex items-center gap-2">
+                                        <button id="toggle-variation-chart-btn" title="Mostrar/Ocultar Variação" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"></button>
+                                        <button id="fullscreen-chart-btn" title="Tela Cheia" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1v4m0 0h-4m4 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5v-4m0 0h-4m4 0l-5 5"></path></svg>
+                                        </button>
                                         <label for="days-filter" class="text-sm text-gray-600 dark:text-gray-300 whitespace-nowrap">Mostrar últimos:</label>
                                         <input type="number" id="days-filter" value="8" min="2" max="90" class="w-20 p-1 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                                         <span class="text-sm text-gray-600 dark:text-gray-300">dias</span>
                                     </div>
                                 </div>
-                                <div class="relative h-80"><canvas id="expenses-chart"></canvas></div>
+                                <div class="relative flex-grow min-h-80"><canvas id="expenses-chart"></canvas></div>
                             </div>
-                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"><h2 class="text-xl font-bold mb-4 text-gray-800 dark:text-white">Lançar Gasto</h2><form id="expense-form"><input type="hidden" id="expenseId"><div class="space-y-4"><input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                                <div class="grid grid-cols-2 gap-4">
-                                    <input type="date" id="expenseDateDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                    <input type="time" id="expenseDateTime" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
-                                </div>
-                                <input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required><select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"><option>Crédito</option><option>Dinheiro</option><option>Débito</option><option>Pix</option><option>VA</option></select><div class="flex items-center space-x-2"><select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select><button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button></div><button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button><button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button></div></form></div>
                         </div>
                         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md">
                             <div class="p-4 flex flex-col sm:flex-row flex-wrap items-center gap-4 dark:text-white">
@@ -145,11 +153,44 @@
                             </div>
                         </div>
                     </section>
+                    
+                    <section id="section-lancar" class="page-section hidden">
+                         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md w-full max-w-xl mx-auto">
+                            <h2 class="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Lançar Gasto</h2>
+                            <form id="expense-form">
+                                <input type="hidden" id="expenseId">
+                                <div class="space-y-4">
+                                    <input type="text" id="expenseDescription" placeholder="Descrição" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                    <input type="text" id="expenseDetail" placeholder="Detalhe" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <input type="date" id="expenseDateDate" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                        <input type="time" id="expenseDateTime" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                    </div>
+                                    <input type="number" step="0.01" id="expenseValue" placeholder="Valor (R$)" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" required>
+                                    <select id="expensePayment" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                                        <option>Crédito</option>
+                                        <option>Dinheiro</option>
+                                        <option>Débito</option>
+                                        <option>Pix</option>
+                                        <option>VA</option>
+                                    </select>
+                                    <div class="flex items-center space-x-2">
+                                        <select id="expenseCategory" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
+                                        <button type="button" id="manage-categories-btn" class="p-2 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500" title="Gerir Categorias">⚙️</button>
+                                    </div>
+                                    <button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">Salvar Gasto</button>
+                                    <button type="button" id="cancel-expense-edit-btn" class="w-full bg-gray-500 text-white p-2 rounded hover:bg-gray-600 hidden">Cancelar Edição</button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+
                     <section id="section-dashboard" class="page-section hidden">
                         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
                             <h1 class="text-2xl lg:text-3xl font-bold text-gray-800 dark:text-white">Dashboard de Análises</h1>
                             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
-                                <label for="dashboard-month-filter" class="text-gray-600 dark:text-gray-300 sm:hidden">Filtrar por:</label>
+                                <label for="dashboard-description-filter" class="text-gray-600 dark:text-gray-300 sm:hidden">Filtrar por:</label>
+                                <input type="search" id="dashboard-description-filter" placeholder="Pesquisar descrição..." class="w-full sm:w-auto p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white" title="Filtro por Descrição">
                                 <select id="dashboard-month-filter" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600" title="Filtro por Mês"></select>
                                 <select id="dashboard-weekday-filter" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white dark:border-gray-600" title="Filtro por Dia da Semana">
                                     <option value="all">Todos os dias</option>
@@ -224,11 +265,11 @@
         const categoryModal = document.getElementById('category-modal');
         const categoryList = document.getElementById('category-list');
         const addCategoryForm = document.getElementById('add-category-form');
-        const expenseCategorySelect = document.getElementById('expenseCategory');
         const filterDescription = document.getElementById('filter-description');
         const filterCategorySelect = document.getElementById('filter-category');
         const filterPaymentSelect = document.getElementById('filter-payment');
         const filterDate = document.getElementById('filter-date');
+        const dashboardDescriptionFilter = document.getElementById('dashboard-description-filter');
         const dashboardMonthFilter = document.getElementById('dashboard-month-filter');
         const dashboardDateFilter = document.getElementById('dashboard-date-filter');
         const dashboardWeekdayFilter = document.getElementById('dashboard-weekday-filter');
@@ -246,6 +287,8 @@
         const registerBtn = document.getElementById('register-btn');
         const daysFilterInput = document.getElementById('days-filter');
         const toggleVariationBtn = document.getElementById('toggle-variation-chart-btn');
+        const fullscreenBtn = document.getElementById('fullscreen-chart-btn');
+        const dailyChartCard = document.getElementById('daily-chart-card');
         
         let unsubscribeExpenses = null;
         let unsubscribeCategories = null;
@@ -470,23 +513,31 @@
             const monthFilter = dashboardMonthFilter.value;
             const dashboardDateValue = dashboardDateFilter.value;
             const dashboardWeekdayValue = dashboardWeekdayFilter.value;
+            const dashboardDescriptionValue = dashboardDescriptionFilter.value.toLowerCase().trim();
+            
             let dashboardExpenses = allExpenses;
+
+            if (dashboardDescriptionValue) {
+                dashboardExpenses = dashboardExpenses.filter(exp => 
+                    exp.description.toLowerCase().includes(dashboardDescriptionValue)
+                );
+            }
 
             if (dashboardDateValue) {
                 const startOfDay = new Date(dashboardDateValue + 'T00:00:00');
                 const endOfDay = new Date(dashboardDateValue + 'T23:59:59.999');
-                dashboardExpenses = allExpenses.filter(exp => exp.date >= startOfDay && exp.date <= endOfDay);
+                dashboardExpenses = dashboardExpenses.filter(exp => exp.date >= startOfDay && exp.date <= endOfDay);
             } else if (dashboardWeekdayValue !== 'all') {
-                dashboardExpenses = allExpenses.filter(exp => exp.date.getDay() == dashboardWeekdayValue);
+                dashboardExpenses = dashboardExpenses.filter(exp => exp.date.getDay() == dashboardWeekdayValue);
             } else if (monthFilter !== 'all') {
                 const [year, month] = monthFilter.split('-').map(Number);
-                dashboardExpenses = allExpenses.filter(exp => exp.date.getFullYear() === year && exp.date.getMonth() === month - 1);
+                dashboardExpenses = dashboardExpenses.filter(exp => exp.date.getFullYear() === year && exp.date.getMonth() === month - 1);
             }
             
             updateAllCharts(dashboardExpenses, filteredExpenses);
         }
 
-        [filterDescription, filterCategorySelect, filterPaymentSelect, filterDate, dashboardMonthFilter, dashboardDateFilter, dashboardWeekdayFilter, daysFilterInput].forEach(el => el.addEventListener('input', applyFiltersAndRender));
+        [filterDescription, filterCategorySelect, filterPaymentSelect, filterDate, dashboardDescriptionFilter, dashboardMonthFilter, dashboardDateFilter, dashboardWeekdayFilter, daysFilterInput].forEach(el => el.addEventListener('input', applyFiltersAndRender));
         
         document.getElementById('clear-filters-btn').addEventListener('click', () => {
             filterDescription.value = '';
@@ -497,6 +548,7 @@
         });
 
         document.getElementById('clear-dashboard-filters-btn').addEventListener('click', () => {
+            dashboardDescriptionFilter.value = '';
             dashboardMonthFilter.value = 'all';
             dashboardDateFilter.value = '';
             dashboardWeekdayFilter.value = 'all';
@@ -585,6 +637,7 @@
         // --- ATUALIZAÇÕES DE UI ---
         function updateCategoryUI(categories) {
             categoryList.innerHTML = '';
+            const expenseCategorySelect = document.getElementById('expenseCategory');
             expenseCategorySelect.innerHTML = '';
             filterCategorySelect.innerHTML = '<option value="all">Todas as Categorias</option>';
             categories.sort((a, b) => a.name.localeCompare(b.name)).forEach(cat => {
@@ -740,6 +793,30 @@
             chart.update();
             updateToggleVariationButton(!isVisible);
         });
+
+        // --- LÓGICA DE TELA CHEIA ---
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                dailyChartCard.requestFullscreen().catch(err => {
+                    alert(`Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        document.addEventListener('fullscreenchange', () => {
+            const isFullscreen = !!document.fullscreenElement;
+            dailyChartCard.classList.toggle('chart-fullscreen', isFullscreen);
+            
+            // Adiciona um pequeno atraso para garantir que o DOM foi atualizado
+            // antes de redimensionar o gráfico. Chamar applyFiltersAndRender()
+            // garante que o gráfico seja completamente redesenhado com o tamanho correto.
+            setTimeout(() => {
+                applyFiltersAndRender();
+            }, 50);
+        });
+
 
         function updateDailyExpensesChart(expenses, numDays) {
             document.getElementById('daily-chart-title').textContent = `Gastos nos Últimos ${numDays} Dias`;
@@ -944,7 +1021,10 @@
             const editExpenseBtn = e.target.closest('.edit-expense-btn');
             if (editExpenseBtn) {
                 const expenseToEdit = allExpenses.find(exp => exp.id === editExpenseBtn.dataset.id);
-                if (expenseToEdit) populateExpenseForm(expenseToEdit);
+                if (expenseToEdit) {
+                    document.getElementById('nav-lancar').click();
+                    setTimeout(() => populateExpenseForm(expenseToEdit), 0);
+                }
             }
         });
 
@@ -962,7 +1042,6 @@
             document.getElementById('expensePayment').value = expense.paymentMethod;
             document.getElementById('expenseCategory').value = expense.category;
             document.getElementById('cancel-expense-edit-btn').classList.remove('hidden');
-            document.getElementById('expense-form').scrollIntoView({ behavior: 'smooth' });
         }
 
         // --- NAVEGAÇÃO E MODAIS ---
@@ -974,7 +1053,12 @@
                 const sectionId = e.currentTarget.id.replace('nav-', 'section-');
                 document.getElementById(sectionId).classList.remove('hidden');
                 e.currentTarget.classList.add('bg-gray-900', 'text-gray-100');
-                if(sectionId === 'section-dashboard' || sectionId === 'section-gastos') applyFiltersAndRender(); 
+                if(sectionId === 'section-dashboard' || sectionId === 'section-gastos') {
+                    applyFiltersAndRender(); 
+                }
+                if (sectionId === 'section-lancar') {
+                    resetExpenseForm();
+                }
                 if (window.innerWidth < 768) toggleMobileSidebar();
             });
         });
