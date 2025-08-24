@@ -67,12 +67,10 @@
                 </div>
                 <div id="error-message" class="text-red-500 text-xs italic mb-4 h-4"></div>
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-                    <button id="login-btn" type="submit" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center gap-2" disabled>
+                    <button id="login-btn" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center justify-center gap-2" disabled>
                         <span class="spinner"></span> <span class="button-text hidden">Aguarde...</span>
                     </button>
-                    <button id="register-btn" type="button" class="w-full sm:w-auto text-center inline-block align-baseline font-bold text-sm text-indigo-500 hover:text-indigo-400 flex items-center justify-center gap-2" disabled>
-                         <span class="spinner hidden"></span> <span class="button-text">Registar Nova Conta</span>
-                    </button>
+                    <!-- O botão de registrar foi removido daqui -->
                 </div>
             </form>
         </div>
@@ -321,7 +319,7 @@
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const loginBtn = document.getElementById('login-btn');
-        const registerBtn = document.getElementById('register-btn');
+        // A variável registerBtn foi removida pois o botão não existe mais
         const daysFilterInput = document.getElementById('days-filter');
         const toggleVariationBtn = document.getElementById('toggle-variation-chart-btn');
         
@@ -487,8 +485,7 @@
                 loginSection.classList.remove('hidden');
                 userInfo.textContent = '';
                 toggleButtonLoading(loginBtn, false, 'Entrar');
-                toggleButtonLoading(registerBtn, false, 'Registar Nova Conta');
-                registerBtn.disabled = false;
+                // Não é mais necessário controlar o botão de registro
                 stopAppListeners();
             }
         });
@@ -1241,38 +1238,9 @@
             }
         });
 
-        registerBtn.addEventListener('click', async () => {
-            toggleButtonLoading(registerBtn, true, '');
-            errorMessage.textContent = '';
-            if (password.value.length < 6) {
-                errorMessage.textContent = 'A senha deve ter pelo menos 6 caracteres.';
-                toggleButtonLoading(registerBtn, false, 'Registar Nova Conta');
-                return;
-            }
-            try {
-                await createUserWithEmailAndPassword(auth, email.value, password.value);
-            } catch (error) {
-                console.error("Erro de registo:", error.code);
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage.textContent = 'Este email já está a ser utilizado.';
-                        break;
-                    case 'auth/invalid-email':
-                        errorMessage.textContent = 'O formato do email é inválido.';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage.textContent = 'A senha é muito fraca (mínimo 6 caracteres).';
-                        break;
-                    case 'auth/network-request-failed':
-                        errorMessage.textContent = 'Erro de rede. Verifique a sua conexão.';
-                        break;
-                    default:
-                        errorMessage.textContent = 'Ocorreu um erro ao tentar registar.';
-                        break;
-                }
-                toggleButtonLoading(registerBtn, false, 'Registar Nova Conta');
-            }
-        });
+        // O event listener para o botão de registro foi removido.
+        // A função de registro createUserWithEmailAndPassword ainda existe no código,
+        // mas não pode ser acionada pela interface.
 
         logoutBtn.addEventListener('click', () => signOut(auth).catch(error => console.error("Erro ao fazer logout:", error)));
 
